@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>iGuider School Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar" data-public>
+    <a class="brand" href="#home" aria-label="iGuider home">
+      <span class="brand-mark">iG</span>
+      <span>
+        <strong>iGuider</strong>
+        <small>School Management</small>
+      </span>
+    </a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="#features">Features</a>
+      <a href="#roles">Roles</a>
+    </nav>
+    <div class="topbar-actions">
+      <button class="nav-icon-btn" data-view="auth" type="button" aria-label="Log in">
+        <span>LI</span>
+        Log In
+      </button>
+      <button class="primary-btn compact-btn" data-view="signup" type="button" aria-label="Sign up">
+        <span>SU</span>
+        Sign Up
+      </button>
+    </div>
+  </header>
+
+  <main id="publicPage">
+    <section id="home" class="hero">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <p class="eyebrow" id="publicHeroEyebrow">Premium school operations platform</p>
+        <h1 id="publicHeroTitle">iGuider School Management System</h1>
+        <p class="hero-copy" id="publicHeroCopy">Run admissions, teachers, classes, subjects, attendance, exams, fees, notices, question papers, homework, and parent progress tracking from one elegant school portal.</p>
+        <div class="hero-proof-row">
+          <span>Multi-school ready</span>
+          <span>Role-based portals</span>
+          <span>Parent mobile experience</span>
+        </div>
+        <div class="hero-actions">
+          <button class="primary-btn" data-view="auth" id="publicHeroButton">School Login</button>
+          <button class="secondary-btn" data-scroll="#features">View Features</button>
+        </div>
+      </div>
+      <div class="hero-visual" aria-label="School ERP preview">
+        <div class="erp-window">
+          <div class="erp-topline"><span></span><span></span><span></span></div>
+          <div class="erp-grid">
+            <div></div><div></div><div></div>
+            <div></div><div></div><div></div>
+          </div>
+          <div class="erp-chart"><span></span><span></span><span></span><span></span></div>
+        </div>
+        <div class="mobile-preview" aria-label="Mobile app preview">
+          <div class="phone-speaker"></div>
+          <div class="phone-screen">
+            <div class="phone-header">
+              <strong>iGuider</strong>
+              <span>Today</span>
+            </div>
+            <div class="phone-card large"></div>
+            <div class="phone-list"><span></span><span></span><span></span></div>
+            <div class="phone-tabs"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+        <div class="student-card">
+          <strong>Academic Growth</strong>
+          <span>Attendance, exams, fees, and reports in one place</span>
+        </div>
+      </div>
+      <aside class="hero-panel hero-metrics-strip" aria-label="Live school summary">
+        <div>
+          <span class="metric-value" id="heroTeacherCount">0</span>
+          <span class="metric-label">Teachers</span>
+        </div>
+        <div>
+          <span class="metric-value" id="heroStudentCount">0</span>
+          <span class="metric-label">Students</span>
+        </div>
+        <div>
+          <span class="metric-value" id="heroExamCount">0</span>
+        <span class="metric-label">Academic Records</span>
+        </div>
+      </aside>
+    </section>
+
+    <section id="features" class="section feature-band">
+      <div class="section-heading">
+        <p class="eyebrow">Complete control</p>
+        <h2>Everything a school needs to operate digitally</h2>
+      </div>
+      <div class="feature-grid">
+        <article class="feature-card">
+          <span class="feature-icon">01</span>
+          <h3>Administration</h3>
+          <p>Manage teachers, students, parents, classes, sections, subjects, and credentials.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-icon">02</span>
+          <h3>Academics</h3>
+          <p>Configure exams, enter marks, prepare reports, track attendance, and assign homework.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-icon">03</span>
+          <h3>Parent Engagement</h3>
+          <p>Parents can view marks, attendance, homework, notices, fee dues, and progress trends.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-icon">04</span>
+          <h3>Operations</h3>
+          <p>Publish notices, build timetables, manage fee records, and maintain audit-ready data.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="roles" class="section role-band">
+      <div class="section-heading">
+        <p class="eyebrow">Role based</p>
+        <h2>Separate dashboards for every user</h2>
+      </div>
+      <div class="role-strip">
+        <div><strong>School Admin</strong><span>Teacher setup, notices, school overview</span></div>
+        <div><strong>Teacher</strong><span>Question papers, marks, parents</span></div>
+        <div><strong>Class Teacher</strong><span>Students and parent records</span></div>
+        <div><strong>Parent</strong><span>Child progress and notices</span></div>
+      </div>
+    </section>
+
+  </main>
+
+  <section id="authPage" class="auth-page" hidden>
+    <button class="back-link" data-view="public">Back to website</button>
+    <div class="auth-ambient">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <div class="auth-stage">
+      <aside class="auth-story">
+        <div class="brand auth-brand">
+          <span class="brand-mark">iG</span>
+          <span>
+            <strong>iGuider</strong>
+            <small>Premium School ERP</small>
+          </span>
+        </div>
+        <p class="eyebrow">Secure access suite</p>
+        <h2>One intelligent portal for every school role.</h2>
+        <p>Admins manage the institution, teachers run academics, and parents track progress through a clean role-based experience.</p>
+        <div class="auth-proof">
+          <div><strong>100%</strong><span>Role controlled</span></div>
+          <div><strong>24/7</strong><span>Parent access</span></div>
+          <div><strong>All-in-one</strong><span>Academic operations</span></div>
+        </div>
+      </aside>
+
+      <div class="login-panel premium-card">
+        <div class="section-heading compact">
+          <p class="eyebrow">Welcome back</p>
+          <h2>Login to iGuider</h2>
+          <p class="mini-text">Choose a role and enter the credentials issued by the school.</p>
+        </div>
+        <div class="auth-switcher" role="tablist" aria-label="Authentication options">
+          <button class="auth-switch active" type="button" data-auth-panel="login">Log In</button>
+          <button class="auth-switch" type="button" data-auth-panel="signup">Sign Up</button>
+        </div>
+        <form id="loginForm" class="login-form">
+          <label>
+            Role
+            <select id="roleSelect">
+              <option value="platform">Platform Administration</option>
+              <option value="admin">School Admin</option>
+              <option value="teacher">Teacher</option>
+              <option value="parent">Parent</option>
+            </select>
+          </label>
+          <label>
+            Username
+            <input id="usernameInput" type="text" autocomplete="username" required />
+          </label>
+          <label>
+            Password
+            <input id="passwordInput" type="password" autocomplete="current-password" required />
+          </label>
+          <button class="primary-btn full" type="submit">Log In</button>
+        </form>
+        <form id="signupForm" class="signup-form" hidden>
+          <p class="mini-text">Create a new school account request. The iGuider administration team will review and activate the account.</p>
+          <div class="signup-methods" role="group" aria-label="Signup methods">
+            <button class="method-btn active" type="button" data-signup-method="email">Email</button>
+            <button class="method-btn" type="button" data-signup-method="mobile">Mobile</button>
+            <button class="method-btn" type="button" data-google-signup>Google</button>
+          </div>
+          <label>School Name<input name="schoolName" required></label>
+          <label>Contact Person<input name="contactName" required></label>
+          <label id="signupEmailField">Email<input name="email" type="email" required></label>
+          <label id="signupMobileField" hidden>Mobile Number<input name="mobile" inputmode="tel"></label>
+          <label>Password<input name="password" type="password" required></label>
+          <button class="secondary-form-btn" type="submit">Create Signup Request</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section id="appPage" class="portal-page" hidden>
+    <aside class="portal-sidebar">
+      <div class="brand portal-brand">
+        <span class="brand-mark">iG</span>
+        <span>
+          <strong>iGuider</strong>
+          <small id="sidebarRole">School ERP</small>
+        </span>
+      </div>
+      <div class="school-chip">
+        <strong>iGuider International</strong>
+        <span>Session 2026-2027</span>
+      </div>
+      <div class="portal-nav-wrap">
+        <span class="sidebar-section-title">Workspace</span>
+        <nav class="portal-menu" id="portalNav" aria-label="Portal modules">
+          <button class="portal-nav-btn active" type="button">Dashboard</button>
+        </nav>
+      </div>
+    </aside>
+
+    <div class="portal-main">
+      <div class="dashboard" id="dashboard" hidden>
+        <header class="app-header">
+          <div class="header-identity" id="headerIdentity">
+            <span class="identity-avatar">iG</span>
+            <div>
+              <p class="eyebrow" id="activeRole">Portal</p>
+              <h2 id="dashboardTitle">Dashboard</h2>
+              <p class="identity-meta">iGuider School Management System</p>
+            </div>
+          </div>
+          <div class="header-actions">
+            <label class="theme-control">
+              Theme
+              <select id="themeSelect">
+                <option value="default">Executive</option>
+                <option value="emerald">Emerald</option>
+                <option value="royal">Royal</option>
+                <option value="graphite">Graphite</option>
+              </select>
+            </label>
+            <button class="ghost-btn" id="editProfileBtn" type="button">Edit Details</button>
+            <button class="ghost-btn" id="logoutBtn" type="button">Logout</button>
+          </div>
+        </header>
+        <section class="workspace-card">
+          <div id="dashboardContent"></div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <div class="modal-backdrop" id="profileModal" hidden>
+    <div class="profile-modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">Account details</p>
+          <h2 id="profileModalTitle">Edit Details</h2>
+        </div>
+        <button class="icon-btn" id="closeProfileBtn" type="button">Close</button>
+      </div>
+      <form id="profileForm" class="form-grid"></form>
+    </div>
+  </div>
+
+  <template id="statCardTemplate">
+    <article class="stat-card">
+      <span class="stat-number"></span>
+      <span class="stat-label"></span>
+    </article>
+  </template>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.example.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
