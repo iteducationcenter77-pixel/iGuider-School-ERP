@@ -1481,8 +1481,10 @@ function handleSignup(event) {
     const dbSchool = await dbInsert("platform_schools", { name: schoolName, code: schoolCode, city: "Not provided", contact_name: contactName, email, mobile, status: "Pending", plan: "Trial" });
     const sId = dbSchool?.id || null;
     if (sId) {
-      await dbInsert("school_profiles", { platform_school_id: sId, name: schoolName, code: schoolCode, session: "2026-2027", board: "Not set", city: "Not provided" });
-      dbInsert("app_users", { school_id: sId, role: "admin", name: contactName, username, password_hash: password });
+      const dbProfile = await dbInsert("school_profiles", { platform_school_id: sId, name: schoolName, code: schoolCode, session: "2026-2027", board: "Not set", city: "Not provided" });
+      if (dbProfile?.id) {
+        await dbInsert("app_users", { school_id: dbProfile.id, role: "admin", name: contactName, username, password_hash: password });
+      }
     }
   })();
   saveState(`Received signup request from ${schoolName}`);
@@ -1888,7 +1890,7 @@ function handleGetStarted(event) {
     `*Email:* ${email}`,
     ``,
     `Submitted from iguider.in`
-  ].filter(Boolean).join("%0A");
+  ].filter(Boolean).join("\n");
 
   const whatsappUrl = `https://wa.me/918638373298?text=${encodeURIComponent(message)}`;
   window.open(whatsappUrl, "_blank");
