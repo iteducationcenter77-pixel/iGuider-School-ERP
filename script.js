@@ -363,17 +363,24 @@ function today() {
 }
 
 function refreshHeroMetrics() {
-  el("#heroTeacherCount").textContent = state.teachers.length;
-  el("#heroStudentCount").textContent = state.students.length;
-  el("#heroExamCount").textContent = state.marks.length + state.attendance.length + state.fees.length;
+  const teacherCount = el("#heroTeacherCount");
+  const studentCount = el("#heroStudentCount");
+  const examCount = el("#heroExamCount");
+  if (teacherCount) teacherCount.textContent = state.teachers.length;
+  if (studentCount) studentCount.textContent = state.students.length;
+  if (examCount) examCount.textContent = state.marks.length + state.attendance.length + state.fees.length;
 }
 
 function updatePublicWebsite() {
   const website = state.school.website || DEFAULT_STATE.school.website;
-  el("#publicHeroEyebrow").textContent = website.heroEyebrow;
-  el("#publicHeroTitle").textContent = website.heroTitle;
-  el("#publicHeroCopy").textContent = website.heroCopy;
-  el("#publicHeroButton").textContent = website.heroButton;
+  const eyebrow = el("#publicHeroEyebrow");
+  const title = el("#publicHeroTitle");
+  const copy = el("#publicHeroCopy");
+  const button = el("#publicHeroButton");
+  if (eyebrow) eyebrow.textContent = website.heroEyebrow;
+  if (title) title.textContent = website.heroTitle;
+  if (copy) copy.textContent = website.heroCopy;
+  if (button) button.textContent = website.heroButton;
   document.documentElement.style.setProperty("--hero-image", `url("${website.heroImage}")`);
 }
 
