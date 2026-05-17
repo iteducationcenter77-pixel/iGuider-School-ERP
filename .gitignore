@@ -1,7 +1,13 @@
-supabase-config.js
+# Environment & Secrets
 .env
 .env.local
+.env.production
+supabase-config.js
+
+# Dependencies
 node_modules/
 dist/
+
+# OS files
 .DS_Store
 Thumbs.db
