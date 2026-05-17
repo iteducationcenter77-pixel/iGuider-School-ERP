@@ -377,32 +377,44 @@ const id = (prefix = "id") => `${prefix}-${Date.now()}-${Math.random().toString(
 function showPublicPage() {
   el("#publicPage").hidden = false;
   el("#authPage").hidden = true;
+  el("#getStartedPage").hidden = true;
   el("#appPage").hidden = true;
   document.querySelector("[data-public]").hidden = false;
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function setAuthPanel(panel = "login") {
-  const isSignup = panel === "signup";
-  el("#loginForm").hidden = isSignup;
-  el("#signupForm").hidden = !isSignup;
-  document.querySelectorAll("[data-auth-panel]").forEach((button) => {
-    button.classList.toggle("active", button.dataset.authPanel === panel);
-  });
-}
-
-function showAuthPage(panel = "login") {
+function showAuthPage() {
   el("#publicPage").hidden = true;
   el("#authPage").hidden = false;
+  el("#getStartedPage").hidden = true;
   el("#appPage").hidden = true;
   document.querySelector("[data-public]").hidden = true;
-  setAuthPanel(panel);
+  // Check for /admin or #admin — inject Platform Administration option
+  const isAdmin = window.location.pathname.includes("/admin") || window.location.hash === "#admin";
+  const roleSelect = el("#roleSelect");
+  if (isAdmin && !roleSelect.querySelector('option[value="platform"]')) {
+    const opt = document.createElement("option");
+    opt.value = "platform";
+    opt.textContent = "Platform Administration";
+    roleSelect.insertBefore(opt, roleSelect.firstChild);
+    roleSelect.value = "platform";
+  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showGetStartedPage() {
+  el("#publicPage").hidden = true;
+  el("#authPage").hidden = true;
+  el("#getStartedPage").hidden = false;
+  el("#appPage").hidden = true;
+  document.querySelector("[data-public]").hidden = true;
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function showAppPage() {
   el("#publicPage").hidden = true;
   el("#authPage").hidden = true;
+  el("#getStartedPage").hidden = true;
   el("#appPage").hidden = false;
   document.querySelector("[data-public]").hidden = true;
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1786,9 +1798,10 @@ function handleSubmit(event) {
 function handleClick(event) {
   const viewTarget = event.target.closest("[data-view]");
   if (viewTarget) {
+    event.preventDefault();
     const view = viewTarget.dataset.view;
     if (view === "auth") showAuthPage();
-    if (view === "signup") showAuthPage("signup");
+    if (view === "getstarted") showGetStartedPage();
     if (view === "public") showPublicPage();
     return;
   }
@@ -1836,17 +1849,10 @@ function initializeRoleDefaults() {
 }
 
 el("#loginForm").addEventListener("submit", handleLogin);
-el("#signupForm").addEventListener("submit", handleSignup);
+el("#getStartedForm").addEventListener("submit", handleGetStarted);
 el("#dashboardContent").addEventListener("submit", handleSubmit);
 el("#dashboardContent").addEventListener("click", handleClick);
 document.addEventListener("click", handleClick);
-document.querySelectorAll("[data-signup-method]").forEach((button) => {
-  button.addEventListener("click", () => setSignupMethod(button.dataset.signupMethod));
-});
-document.querySelectorAll("[data-auth-panel]").forEach((button) => {
-  button.addEventListener("click", () => setAuthPanel(button.dataset.authPanel));
-});
-document.querySelector("[data-google-signup]").addEventListener("click", handleGoogleSignup);
 el("#editProfileBtn").addEventListener("click", openProfileModal);
 el("#closeProfileBtn").addEventListener("click", closeProfileModal);
 el("#profileModal").addEventListener("click", (event) => {
@@ -1860,10 +1866,54 @@ el("#logoutBtn").addEventListener("click", () => {
   showAuthPage();
 });
 
+// Get Started → WhatsApp form handler
+function handleGetStarted(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const schoolName = formValue(form, "schoolName");
+  const address = formValue(form, "address");
+  const totalStudents = formValue(form, "totalStudents");
+  const contactNumber = formValue(form, "contactNumber");
+  const altNumber = formValue(form, "altNumber");
+  const email = formValue(form, "email");
+
+  const message = [
+    `🏫 *New School Inquiry — iGuider ERP*`,
+    ``,
+    `*School/Institute:* ${schoolName}`,
+    `*Address:* ${address}`,
+    `*Total Students (Approx):* ${totalStudents}`,
+    `*Contact Number:* ${contactNumber}`,
+    altNumber ? `*Alternative Number:* ${altNumber}` : "",
+    `*Email:* ${email}`,
+    ``,
+    `Submitted from iguider.in`
+  ].filter(Boolean).join("%0A");
+
+  const whatsappUrl = `https://wa.me/918638373298?text=${encodeURIComponent(message)}`;
+  window.open(whatsappUrl, "_blank");
+
+  // Also save to Supabase for tracking
+  dbInsert("audit_logs", {
+    school_id: getSchoolDbId(),
+    actor: email || contactNumber,
+    action: `Inquiry from ${schoolName} (${totalStudents} students)`,
+    log_date: today()
+  });
+
+  form.reset();
+  alert("Thank you! Your inquiry has been sent to our WhatsApp. Our team will contact you within 24 hours.");
+}
+
 applyTheme(activeTheme);
 initializeRoleDefaults();
 refreshHeroMetrics();
 updatePublicWebsite();
+
+// Auto-route: if URL has /admin or #admin, go straight to login with Platform Admin
+if (window.location.pathname.includes("/admin") || window.location.hash === "#admin") {
+  showAuthPage();
+}
 
 // Sync from Supabase on app startup
 syncFromSupabase();
