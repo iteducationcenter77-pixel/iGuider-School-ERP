@@ -90,6 +90,202 @@ const seedData = {
   ]
 };
 
+/* ═══════════════════════════════════════════════════════
+   Supabase Data Layer
+   ═══════════════════════════════════════════════════════ */
+const sbConfig = window.IGUIDER_SUPABASE || {};
+const sb = sbConfig.url && sbConfig.anonKey && window.supabase
+  ? window.supabase.createClient(sbConfig.url, sbConfig.anonKey)
+  : null;
+
+if (sb) console.log("✓ Supabase connected:", sbConfig.url);
+else console.warn("⚠ Supabase not configured — using localStorage only");
+
+// Snake ↔ Camel case converters
+const toSnake = (s) => s.replace(/([A-Z])/g, "_$1").toLowerCase();
+const toCamel = (s) => s.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+const objToSnake = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [toSnake(k), v]));
+const objToCamel = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [toCamel(k), v]));
+const rowsToCamel = (rows) => (rows || []).map(objToCamel);
+
+// Column overrides for specific table fields that don't follow simple conversion
+const COL_MAP = {
+  max: "max_marks", maxMarks: "max_marks",
+  date: "notice_date", dueDate: "due_date",
+  examDate: "exam_date", logDate: "log_date",
+  attendanceDate: "attendance_date",
+  passwordHash: "password_hash"
+};
+
+// Table name mapping (JS state key → Supabase table)
+const TABLE_MAP = {
+  schools: "platform_schools",
+  school: "school_profiles",
+  users: "app_users",
+  teachers: "teachers",
+  students: "students",
+  parents: "parents",
+  classes: "classes",
+  subjects: "subjects",
+  notices: "notices",
+  exams: "exams",
+  marks: "marks",
+  attendance: "attendance",
+  homework: "homework",
+  fees: "fees",
+  timetable: "timetable",
+  papers: "question_papers",
+  auditLogs: "audit_logs"
+};
+
+// CRUD helpers — all return silently on failure so localStorage fallback works
+async function dbSelect(table) {
+  if (!sb) return null;
+  try {
+    const { data, error } = await sb.from(table).select("*");
+    if (error) { console.error(`dbSelect ${table}:`, error.message); return null; }
+    return rowsToCamel(data);
+  } catch (e) { console.error(`dbSelect ${table}:`, e); return null; }
+}
+
+async function dbInsert(table, row) {
+  if (!sb) return null;
+  try {
+    // Map JS keys to snake_case, but handle special column names
+    const mapped = {};
+    for (const [k, v] of Object.entries(row)) {
+      if (k === "id" && typeof v === "string" && !v.includes("-")) continue; // skip non-uuid IDs
+      const col = COL_MAP[k] || toSnake(k);
+      mapped[col] = v;
+    }
+    const { data, error } = await sb.from(table).insert(mapped).select();
+    if (error) { console.error(`dbInsert ${table}:`, error.message); return null; }
+    return data?.[0] ? objToCamel(data[0]) : null;
+  } catch (e) { console.error(`dbInsert ${table}:`, e); return null; }
+}
+
+async function dbUpdate(table, id, updates) {
+  if (!sb || !id) return null;
+  try {
+    const mapped = {};
+    for (const [k, v] of Object.entries(updates)) {
+      const col = COL_MAP[k] || toSnake(k);
+      mapped[col] = v;
+    }
+    const { error } = await sb.from(table).update(mapped).eq("id", id);
+    if (error) console.error(`dbUpdate ${table}:`, error.message);
+  } catch (e) { console.error(`dbUpdate ${table}:`, e); }
+}
+
+async function dbDelete(table, id) {
+  if (!sb || !id) return;
+  try {
+    const { error } = await sb.from(table).delete().eq("id", id);
+    if (error) console.error(`dbDelete ${table}:`, error.message);
+  } catch (e) { console.error(`dbDelete ${table}:`, e); }
+}
+
+// Fetch all data from Supabase and merge into state
+async function syncFromSupabase() {
+  if (!sb) return;
+  console.log("⏳ Syncing from Supabase...");
+  try {
+    const [schools, profiles, users, teachers, students, parents,
+           classes, subjects, notices, exams, marks, attendance,
+           homework, fees, timetable, papers, logs] = await Promise.all([
+      dbSelect("platform_schools"),
+      dbSelect("school_profiles"),
+      dbSelect("app_users"),
+      dbSelect("teachers"),
+      dbSelect("students"),
+      dbSelect("parents"),
+      dbSelect("classes"),
+      dbSelect("subjects"),
+      dbSelect("notices"),
+      dbSelect("exams"),
+      dbSelect("marks"),
+      dbSelect("attendance"),
+      dbSelect("homework"),
+      dbSelect("fees"),
+      dbSelect("timetable"),
+      dbSelect("question_papers"),
+      dbSelect("audit_logs")
+    ]);
+
+    if (schools?.length) state.schools = schools;
+    if (profiles?.length) {
+      const p = profiles[0];
+      state.school = { ...state.school, name: p.name, code: p.code, session: p.session, board: p.board, city: p.city, dbId: p.id, platformSchoolId: p.platformSchoolId };
+    }
+    if (users?.length) {
+      state.users = users.map(u => ({
+        role: u.role, username: u.username, password: u.passwordHash || u.password || "",
+        name: u.name, teacherId: u.teacherId, parentId: u.parentId, dbId: u.id, schoolId: u.schoolId
+      }));
+    }
+    if (teachers?.length) state.teachers = teachers.map(t => ({
+      id: t.id, name: t.name, username: t.username, email: t.email, phone: t.phone,
+      subjects: t.subjects || [], classes: t.classes || [], classTeacherOf: t.classTeacherOf,
+      status: t.status || "Active", password: ""
+    }));
+    if (students?.length) state.students = students.map(s => ({
+      id: s.id, admissionNo: s.admissionNo, name: s.name, className: s.className,
+      rollNo: s.rollNo, parentId: s.parentId, dob: s.dob, status: s.status || "Active"
+    }));
+    if (parents?.length) state.parents = parents.map(p => ({
+      id: p.id, name: p.name, username: p.username, phone: p.phone, email: p.email, password: ""
+    }));
+    if (classes?.length) state.classes = classes.map(c => ({
+      id: c.id, name: c.name, grade: c.grade, section: c.section, room: c.room, classTeacherId: c.classTeacherId
+    }));
+    if (subjects?.length) state.subjects = subjects.map(s => ({ id: s.id, name: s.name, code: s.code }));
+    if (notices?.length) state.notices = notices.map(n => ({
+      id: n.id, title: n.title, audience: n.audience, priority: n.priority, message: n.message, date: n.noticeDate
+    }));
+    if (exams?.length) state.exams = exams.map(e => ({
+      id: e.id, name: e.name, type: e.type, className: e.className, max: e.maxMarks, date: e.examDate, status: e.status
+    }));
+    if (marks?.length) state.marks = marks.map(m => ({
+      id: m.id, examId: m.examId, studentId: m.studentId, className: m.className,
+      subject: m.subject, type: m.type, title: m.title, score: m.score, max: m.maxMarks, published: m.published
+    }));
+    if (attendance?.length) state.attendance = attendance.map(a => ({
+      id: a.id, studentId: a.studentId, className: a.className, date: a.attendanceDate, status: a.status, note: a.note
+    }));
+    if (homework?.length) state.homework = homework.map(h => ({
+      id: h.id, teacherId: h.teacherId, className: h.className, subject: h.subject,
+      title: h.title, dueDate: h.dueDate, details: h.details
+    }));
+    if (fees?.length) state.fees = fees.map(f => ({
+      id: f.id, studentId: f.studentId, term: f.term, amount: f.amount, paid: f.paid, dueDate: f.dueDate, status: f.status
+    }));
+    if (timetable?.length) state.timetable = timetable.map(t => ({
+      id: t.id, className: t.className, day: t.day, period: t.period, subject: t.subject, teacherId: t.teacherId, time: t.time
+    }));
+    if (papers?.length) state.papers = papers.map(p => ({
+      id: p.id, teacherId: p.teacherId, className: p.className, subject: p.subject,
+      title: p.title, duration: p.duration, max: p.maxMarks, questions: p.questions
+    }));
+    if (logs?.length) state.auditLogs = logs.map(l => ({ id: l.id, actor: l.actor, action: l.action, date: l.logDate }));
+
+    // Cache to localStorage
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    console.log("✓ Supabase sync complete");
+
+    // Re-render if we're on a dashboard
+    if (session) renderDashboard();
+    refreshHeroMetrics();
+    updatePublicWebsite();
+  } catch (e) {
+    console.error("Supabase sync failed:", e);
+  }
+}
+
+// Get the school's DB ID for foreign key inserts
+function getSchoolDbId() {
+  return state.school?.dbId || null;
+}
+
 let state = loadState();
 let session = null;
 let activeTab = "overview";
@@ -189,7 +385,9 @@ function normalizeState(data) {
 
 function saveState(action = "") {
   if (action) {
-    state.auditLogs.unshift({ id: id("log"), actor: session?.name || "System", action, date: today() });
+    const logEntry = { id: id("log"), actor: session?.name || "System", action, date: today() };
+    state.auditLogs.unshift(logEntry);
+    dbInsert("audit_logs", { school_id: getSchoolDbId(), actor: logEntry.actor, action, log_date: today() });
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   refreshHeroMetrics();
@@ -1125,12 +1323,25 @@ function examOptions(exams) {
   return exams.map((exam) => `<option value="${exam.id}">${escapeHtml(exam.name)} - ${escapeHtml(exam.className)}</option>`).join("");
 }
 
-function handleLogin(event) {
+async function handleLogin(event) {
   event.preventDefault();
   const role = el("#roleSelect").value;
   const username = el("#usernameInput").value.trim();
   const password = el("#passwordInput").value;
-  const user = state.users.find((item) => item.role === role && item.username === username && item.password === password);
+
+  // Try Supabase first, fall back to localStorage
+  let user = null;
+  if (sb) {
+    try {
+      const { data, error } = await sb.from("app_users").select("*").eq("role", role).eq("username", username).eq("password_hash", password).maybeSingle();
+      if (!error && data) {
+        user = { role: data.role, username: data.username, password: data.password_hash, name: data.name, teacherId: data.teacher_id, parentId: data.parent_id, dbId: data.id, schoolId: data.school_id };
+      }
+    } catch (e) { console.error("Supabase login query failed:", e); }
+  }
+  if (!user) {
+    user = state.users.find((item) => item.role === role && item.username === username && item.password === password);
+  }
 
   if (!user) {
     alert("Invalid login details. Please use the credentials issued by the school administrator.");
@@ -1148,6 +1359,8 @@ function handleLogin(event) {
   session = user;
   activeTab = "overview";
   renderDashboard();
+  // Sync data from Supabase in background after login
+  syncFromSupabase();
 }
 
 function handleSignup(event) {
@@ -1164,19 +1377,22 @@ function handleSignup(event) {
   }
   const schoolId = id("school");
   const schoolCode = `IG-${Math.floor(1000 + Math.random() * 9000)}`;
-  state.schools.unshift({
-    id: schoolId,
-    name: schoolName,
-    code: schoolCode,
-    city: "Not provided",
-    contactName: formValue(form, "contactName"),
-    email,
-    mobile,
-    status: "Pending",
-    plan: "Trial",
-    joined: today()
-  });
-  state.users.push({ role: "admin", username, password, name: formValue(form, "contactName"), schoolId });
+  const contactName = formValue(form, "contactName");
+  const schoolEntry = {
+    id: schoolId, name: schoolName, code: schoolCode, city: "Not provided",
+    contactName, email, mobile, status: "Pending", plan: "Trial", joined: today()
+  };
+  state.schools.unshift(schoolEntry);
+  state.users.push({ role: "admin", username, password, name: contactName, schoolId });
+  // Insert into Supabase
+  (async () => {
+    const dbSchool = await dbInsert("platform_schools", { name: schoolName, code: schoolCode, city: "Not provided", contact_name: contactName, email, mobile, status: "Pending", plan: "Trial" });
+    const sId = dbSchool?.id || null;
+    if (sId) {
+      await dbInsert("school_profiles", { platform_school_id: sId, name: schoolName, code: schoolCode, session: "2026-2027", board: "Not set", city: "Not provided" });
+      dbInsert("app_users", { school_id: sId, role: "admin", name: contactName, username, password_hash: password });
+    }
+  })();
   saveState(`Received signup request from ${schoolName}`);
   form.reset();
   alert("Signup request submitted. iGuider administration will review and activate the school account.");
@@ -1327,24 +1543,30 @@ function handleSubmit(event) {
   event.preventDefault();
   const action = form.dataset.action;
   const teacher = currentTeacher();
+  const sid = getSchoolDbId();
 
   if (action === "add-class") {
     const className = formValue(form, "name");
     const teacherId = formValue(form, "classTeacherId");
-    state.classes.push({ id: id("class"), name: className, grade: formValue(form, "grade"), section: formValue(form, "section"), room: formValue(form, "room"), classTeacherId: teacherId });
+    const entry = { id: id("class"), name: className, grade: formValue(form, "grade"), section: formValue(form, "section"), room: formValue(form, "room"), classTeacherId: teacherId };
+    state.classes.push(entry);
     if (teacherId) {
       const classTeacher = state.teachers.find((item) => item.id === teacherId);
       if (classTeacher) {
         classTeacher.classTeacherOf = className;
         if (!classTeacher.classes.includes(className)) classTeacher.classes.push(className);
+        dbUpdate("teachers", classTeacher.id, { class_teacher_of: className, classes: classTeacher.classes });
       }
     }
+    dbInsert("classes", { school_id: sid, name: className, grade: entry.grade, section: entry.section, room: entry.room, class_teacher_id: teacherId || null });
     saveState(`Created class ${className}`);
   }
 
   if (action === "add-subject") {
-    state.subjects.push({ id: id("subject"), name: formValue(form, "name"), code: formValue(form, "code").toUpperCase() });
-    saveState(`Created subject ${formValue(form, "name")}`);
+    const entry = { id: id("subject"), name: formValue(form, "name"), code: formValue(form, "code").toUpperCase() };
+    state.subjects.push(entry);
+    dbInsert("subjects", { school_id: sid, name: entry.name, code: entry.code });
+    saveState(`Created subject ${entry.name}`);
   }
 
   if (action === "add-teacher") {
@@ -1352,89 +1574,91 @@ function handleSubmit(event) {
     const username = formValue(form, "username");
     const password = formValue(form, "password");
     const name = formValue(form, "name");
+    const subjectsList = formValue(form, "subjects").split(",").map((item) => item.trim()).filter(Boolean);
+    const classesList = formValue(form, "classes").split(",").map((item) => item.trim()).filter(Boolean);
+    const classTeacherOf = formValue(form, "classTeacherOf");
     state.teachers.push({
-      id: teacherId,
-      name,
-      username,
-      password,
-      email: formValue(form, "email"),
-      phone: formValue(form, "phone"),
-      subjects: formValue(form, "subjects").split(",").map((item) => item.trim()).filter(Boolean),
-      classes: formValue(form, "classes").split(",").map((item) => item.trim()).filter(Boolean),
-      classTeacherOf: formValue(form, "classTeacherOf"),
-      status: "Active"
+      id: teacherId, name, username, password,
+      email: formValue(form, "email"), phone: formValue(form, "phone"),
+      subjects: subjectsList, classes: classesList, classTeacherOf, status: "Active"
     });
     state.users.push({ role: "teacher", username, password, teacherId, name });
+    // Insert teacher first, then user
+    (async () => {
+      const dbTeacher = await dbInsert("teachers", { school_id: sid, name, username, email: formValue(form, "email"), phone: formValue(form, "phone"), subjects: subjectsList, classes: classesList, class_teacher_of: classTeacherOf, status: "Active" });
+      const tId = dbTeacher?.id || null;
+      dbInsert("app_users", { school_id: sid, role: "teacher", name, username, password_hash: password, teacher_id: tId });
+    })();
     saveState(`Added teacher ${name}`);
   }
 
   if (action === "add-notice") {
-    state.notices.unshift({ id: id("notice"), title: formValue(form, "title"), audience: formValue(form, "audience"), priority: formValue(form, "priority"), message: formValue(form, "message"), date: today() });
-    saveState(`Published notice ${formValue(form, "title")}`);
+    const entry = { id: id("notice"), title: formValue(form, "title"), audience: formValue(form, "audience"), priority: formValue(form, "priority"), message: formValue(form, "message"), date: today() };
+    state.notices.unshift(entry);
+    dbInsert("notices", { school_id: sid, title: entry.title, audience: entry.audience, priority: entry.priority, message: entry.message, notice_date: today() });
+    saveState(`Published notice ${entry.title}`);
   }
 
   if (action === "add-exam") {
-    state.exams.unshift({ id: id("exam"), name: formValue(form, "name"), type: formValue(form, "type"), className: formValue(form, "className"), max: Number(formValue(form, "max")), date: formValue(form, "date"), status: formValue(form, "status") });
-    saveState(`Created exam ${formValue(form, "name")}`);
+    const entry = { id: id("exam"), name: formValue(form, "name"), type: formValue(form, "type"), className: formValue(form, "className"), max: Number(formValue(form, "max")), date: formValue(form, "date"), status: formValue(form, "status") };
+    state.exams.unshift(entry);
+    dbInsert("exams", { school_id: sid, name: entry.name, type: entry.type, class_name: entry.className, max_marks: entry.max, exam_date: entry.date || null, status: entry.status });
+    saveState(`Created exam ${entry.name}`);
   }
 
   if (action === "add-marks") {
     const student = state.students.find((item) => item.id === formValue(form, "studentId"));
     if (!student) return;
-    state.marks.unshift({
-      id: id("mark"),
-      examId: formValue(form, "examId"),
-      studentId: student.id,
-      className: student.className,
-      subject: formValue(form, "subject"),
-      type: formValue(form, "type"),
-      title: formValue(form, "title"),
-      score: Number(formValue(form, "score")),
-      max: Number(formValue(form, "max")),
+    const entry = {
+      id: id("mark"), examId: formValue(form, "examId"), studentId: student.id,
+      className: student.className, subject: formValue(form, "subject"),
+      type: formValue(form, "type"), title: formValue(form, "title"),
+      score: Number(formValue(form, "score")), max: Number(formValue(form, "max")),
       published: formValue(form, "published") !== "false"
-    });
+    };
+    state.marks.unshift(entry);
+    dbInsert("marks", { school_id: sid, exam_id: entry.examId?.includes("-") ? entry.examId : null, student_id: student.id, class_name: entry.className, subject: entry.subject, type: entry.type, title: entry.title, score: entry.score, max_marks: entry.max, published: entry.published });
     saveState(`Saved marks for ${student.name}`);
   }
 
   if (action === "add-attendance") {
     const student = state.students.find((item) => item.id === formValue(form, "studentId"));
     if (!student) return;
-    state.attendance.unshift({ id: id("attendance"), studentId: student.id, className: student.className, date: formValue(form, "date"), status: formValue(form, "status"), note: formValue(form, "note") });
+    const entry = { id: id("attendance"), studentId: student.id, className: student.className, date: formValue(form, "date"), status: formValue(form, "status"), note: formValue(form, "note") };
+    state.attendance.unshift(entry);
+    dbInsert("attendance", { school_id: sid, student_id: student.id, class_name: entry.className, attendance_date: entry.date, status: entry.status, note: entry.note });
     saveState(`Marked attendance for ${student.name}`);
   }
 
   if (action === "add-homework") {
-    state.homework.unshift({ id: id("homework"), teacherId: teacher.id, className: formValue(form, "className"), subject: formValue(form, "subject"), title: formValue(form, "title"), dueDate: formValue(form, "dueDate"), details: formValue(form, "details") });
-    saveState(`Assigned homework ${formValue(form, "title")}`);
+    const entry = { id: id("homework"), teacherId: teacher.id, className: formValue(form, "className"), subject: formValue(form, "subject"), title: formValue(form, "title"), dueDate: formValue(form, "dueDate"), details: formValue(form, "details") };
+    state.homework.unshift(entry);
+    dbInsert("homework", { school_id: sid, teacher_id: teacher.id, class_name: entry.className, subject: entry.subject, title: entry.title, due_date: entry.dueDate || null, details: entry.details });
+    saveState(`Assigned homework ${entry.title}`);
   }
 
   if (action === "add-paper") {
-    state.papers.unshift({
-      id: id("paper"),
-      teacherId: teacher.id,
-      className: formValue(form, "className"),
-      subject: formValue(form, "subject"),
-      title: formValue(form, "title"),
-      duration: formValue(form, "duration"),
-      max: formValue(form, "max"),
+    const entry = {
+      id: id("paper"), teacherId: teacher.id, className: formValue(form, "className"),
+      subject: formValue(form, "subject"), title: formValue(form, "title"),
+      duration: formValue(form, "duration"), max: formValue(form, "max"),
       questions: formValue(form, "questions")
-    });
-    saveState(`Created question paper ${formValue(form, "title")}`);
+    };
+    state.papers.unshift(entry);
+    dbInsert("question_papers", { school_id: sid, teacher_id: teacher.id, class_name: entry.className, subject: entry.subject, title: entry.title, duration: entry.duration, max_marks: entry.max, questions: entry.questions });
+    saveState(`Created question paper ${entry.title}`);
   }
 
   if (action === "add-student" || action === "add-student-admin") {
     const className = action === "add-student" ? teacher.classTeacherOf : formValue(form, "className");
     const name = formValue(form, "name");
-    state.students.push({
-      id: id("student"),
-      admissionNo: formValue(form, "admissionNo"),
-      name,
-      className,
-      rollNo: formValue(form, "rollNo"),
-      dob: formValue(form, "dob"),
-      parentId: formValue(form, "parentId"),
-      status: "Active"
-    });
+    const entry = {
+      id: id("student"), admissionNo: formValue(form, "admissionNo"), name, className,
+      rollNo: formValue(form, "rollNo"), dob: formValue(form, "dob"),
+      parentId: formValue(form, "parentId"), status: "Active"
+    };
+    state.students.push(entry);
+    dbInsert("students", { school_id: sid, admission_no: entry.admissionNo, name, class_name: className, roll_no: entry.rollNo, dob: entry.dob || null, parent_id: entry.parentId?.includes("-") ? entry.parentId : null, status: "Active" });
     saveState(`Added student ${name}`);
   }
 
@@ -1445,19 +1669,28 @@ function handleSubmit(event) {
     const name = formValue(form, "name");
     state.parents.push({ id: parentId, name, username, password, phone: formValue(form, "phone"), email: formValue(form, "email") });
     state.users.push({ role: "parent", username, password, parentId, name });
+    (async () => {
+      const dbParent = await dbInsert("parents", { school_id: sid, name, username, email: formValue(form, "email"), phone: formValue(form, "phone") });
+      const pId = dbParent?.id || null;
+      dbInsert("app_users", { school_id: sid, role: "parent", name, username, password_hash: password, parent_id: pId });
+    })();
     saveState(`Added parent ${name}`);
   }
 
   if (action === "add-fee") {
     const amount = Number(formValue(form, "amount"));
     const paid = Number(formValue(form, "paid"));
-    state.fees.unshift({ id: id("fee"), studentId: formValue(form, "studentId"), term: formValue(form, "term"), amount, paid, dueDate: formValue(form, "dueDate"), status: feeStatus(amount, paid) });
-    saveState(`Updated fee ledger for ${formValue(form, "term")}`);
+    const entry = { id: id("fee"), studentId: formValue(form, "studentId"), term: formValue(form, "term"), amount, paid, dueDate: formValue(form, "dueDate"), status: feeStatus(amount, paid) };
+    state.fees.unshift(entry);
+    dbInsert("fees", { school_id: sid, student_id: entry.studentId?.includes("-") ? entry.studentId : null, term: entry.term, amount, paid, due_date: entry.dueDate || null, status: entry.status });
+    saveState(`Updated fee ledger for ${entry.term}`);
   }
 
   if (action === "add-timetable") {
-    state.timetable.unshift({ id: id("timetable"), className: formValue(form, "className"), day: formValue(form, "day"), period: formValue(form, "period"), time: formValue(form, "time"), subject: formValue(form, "subject"), teacherId: formValue(form, "teacherId") });
-    saveState(`Added timetable period for ${formValue(form, "className")}`);
+    const entry = { id: id("timetable"), className: formValue(form, "className"), day: formValue(form, "day"), period: formValue(form, "period"), time: formValue(form, "time"), subject: formValue(form, "subject"), teacherId: formValue(form, "teacherId") };
+    state.timetable.unshift(entry);
+    dbInsert("timetable", { school_id: sid, class_name: entry.className, day: entry.day, period: entry.period, time: entry.time, subject: entry.subject, teacher_id: entry.teacherId?.includes("-") ? entry.teacherId : null });
+    saveState(`Added timetable period for ${entry.className}`);
   }
 
   form.reset();
@@ -1493,6 +1726,7 @@ function handleClick(event) {
     const teacher = state.teachers.find((item) => item.id === teacherId);
     state.teachers = state.teachers.filter((item) => item.id !== teacherId);
     state.users = state.users.filter((item) => item.teacherId !== teacherId && item.username !== teacher?.username);
+    dbDelete("teachers", teacherId);
     saveState(`Removed teacher ${teacher?.name || teacherId}`);
     renderDashboard();
   }
@@ -1502,6 +1736,7 @@ function handleClick(event) {
     const school = state.schools.find((item) => item.id === schoolStatusBtn.dataset.id);
     if (!school) return;
     school.status = schoolStatusBtn.dataset.schoolStatus;
+    dbUpdate("platform_schools", school.id, { status: school.status });
     saveState(`${school.status} school ${school.name}`);
     renderDashboard();
   }
@@ -1543,3 +1778,6 @@ applyTheme(activeTheme);
 initializeRoleDefaults();
 refreshHeroMetrics();
 updatePublicWebsite();
+
+// Sync from Supabase on app startup
+syncFromSupabase();
