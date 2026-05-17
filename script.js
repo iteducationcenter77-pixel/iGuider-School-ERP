@@ -267,6 +267,13 @@ async function syncFromSupabase() {
       title: p.title, duration: p.duration, max: p.maxMarks, questions: p.questions
     }));
     if (logs?.length) state.auditLogs = logs.map(l => ({ id: l.id, actor: l.actor, action: l.action, date: l.logDate }));
+    // If Supabase has no data at all, seed it from localStorage seed data
+    const hasData = schools?.length || profiles?.length || users?.length;
+    if (!hasData) {
+      console.log("📦 Supabase empty — pushing seed data...");
+      await seedSupabase();
+      return; // seedSupabase will re-trigger sync
+    }
 
     // Cache to localStorage
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -278,6 +285,79 @@ async function syncFromSupabase() {
     updatePublicWebsite();
   } catch (e) {
     console.error("Supabase sync failed:", e);
+  }
+}
+
+// Push seed data to Supabase on first run
+async function seedSupabase() {
+  if (!sb) return;
+  try {
+    // 1. Create platform school
+    const school = state.schools[0];
+    const dbSchool = await dbInsert("platform_schools", {
+      name: school.name, code: school.code, city: school.city || "New Delhi",
+      contact_name: school.contactName || school.name, email: school.email || "",
+      mobile: school.mobile || "", status: school.status || "Active",
+      plan: school.plan || "Trial"
+    });
+    const platformSchoolId = dbSchool?.id || null;
+
+    // 2. Create school profile
+    const sp = state.school;
+    const dbProfile = await dbInsert("school_profiles", {
+      platform_school_id: platformSchoolId,
+      name: sp.name, code: sp.code, session: sp.session, board: sp.board, city: sp.city
+    });
+    const schoolDbId = dbProfile?.id || null;
+    state.school.dbId = schoolDbId;
+
+    // 3. Create all users
+    for (const u of state.users) {
+      const userRow = { school_id: schoolDbId, role: u.role, name: u.name, username: u.username, password_hash: u.password };
+      if (u.role === "teacher") {
+        const dbTeacher = state.teachers.find(t => t.username === u.username);
+        if (dbTeacher) {
+          const inserted = await dbInsert("teachers", {
+            school_id: schoolDbId, name: dbTeacher.name, username: dbTeacher.username,
+            email: dbTeacher.email || "", phone: dbTeacher.phone || "",
+            subjects: dbTeacher.subjects || [], classes: dbTeacher.classes || [],
+            class_teacher_of: dbTeacher.classTeacherOf || "", status: dbTeacher.status || "Active"
+          });
+          if (inserted?.id) userRow.teacher_id = inserted.id;
+        }
+      }
+      if (u.role === "parent") {
+        const dbParent = state.parents.find(p => p.username === u.username);
+        if (dbParent) {
+          const inserted = await dbInsert("parents", {
+            school_id: schoolDbId, name: dbParent.name, username: dbParent.username,
+            email: dbParent.email || "", phone: dbParent.phone || ""
+          });
+          if (inserted?.id) userRow.parent_id = inserted.id;
+        }
+      }
+      await dbInsert("app_users", userRow);
+    }
+
+    // 4. Seed classes, subjects, students, etc.
+    for (const c of state.classes) await dbInsert("classes", { school_id: schoolDbId, name: c.name, grade: c.grade, section: c.section, room: c.room || "" });
+    for (const s of state.subjects) await dbInsert("subjects", { school_id: schoolDbId, name: s.name, code: s.code });
+    for (const s of state.students) await dbInsert("students", { school_id: schoolDbId, admission_no: s.admissionNo || "", name: s.name, class_name: s.className, roll_no: s.rollNo || "", dob: s.dob || null, status: s.status || "Active" });
+    for (const n of state.notices) await dbInsert("notices", { school_id: schoolDbId, title: n.title, audience: n.audience, priority: n.priority, message: n.message, notice_date: n.date });
+    for (const e of state.exams) await dbInsert("exams", { school_id: schoolDbId, name: e.name, type: e.type, class_name: e.className, max_marks: e.max, exam_date: e.date || null, status: e.status });
+    for (const m of state.marks) await dbInsert("marks", { school_id: schoolDbId, class_name: m.className, subject: m.subject, type: m.type, title: m.title, score: m.score, max_marks: m.max, published: m.published !== false });
+    for (const a of state.attendance) await dbInsert("attendance", { school_id: schoolDbId, class_name: a.className, attendance_date: a.date, status: a.status, note: a.note || "" });
+    for (const h of state.homework) await dbInsert("homework", { school_id: schoolDbId, class_name: h.className, subject: h.subject, title: h.title, due_date: h.dueDate || null, details: h.details || "" });
+    for (const f of state.fees) await dbInsert("fees", { school_id: schoolDbId, term: f.term, amount: f.amount, paid: f.paid || 0, due_date: f.dueDate || null, status: f.status });
+    for (const t of state.timetable) await dbInsert("timetable", { school_id: schoolDbId, class_name: t.className, day: t.day, period: t.period, subject: t.subject, time: t.time || "" });
+    for (const p of state.papers) await dbInsert("question_papers", { school_id: schoolDbId, class_name: p.className, subject: p.subject, title: p.title, duration: p.duration || "", max_marks: p.max || "", questions: p.questions || "" });
+    for (const l of state.auditLogs) await dbInsert("audit_logs", { school_id: schoolDbId, actor: l.actor, action: l.action, log_date: l.date });
+
+    console.log("✓ Seed data pushed to Supabase");
+    // Re-sync to get proper UUIDs from the database
+    await syncFromSupabase();
+  } catch (e) {
+    console.error("Seed to Supabase failed:", e);
   }
 }
 
@@ -1491,6 +1571,7 @@ function saveProfile(event) {
       user.username = formValue(form, "username");
       user.password = formValue(form, "password");
       session = user;
+      if (user.dbId) dbUpdate("app_users", user.dbId, { name: user.name, username: user.username, password_hash: user.password });
     }
     saveState("Updated platform administration profile");
   }
@@ -1501,6 +1582,7 @@ function saveProfile(event) {
     state.school.board = formValue(form, "board");
     state.school.city = formValue(form, "city");
     session.name = state.school.name;
+    if (state.school.dbId) dbUpdate("school_profiles", state.school.dbId, { name: state.school.name, code: state.school.code, session: state.school.session, board: state.school.board, city: state.school.city });
     saveState("Updated school profile details");
   }
   if (session.role === "teacher") {
@@ -1516,6 +1598,8 @@ function saveProfile(event) {
       session.name = teacher.name;
       session.password = teacher.password;
     }
+    dbUpdate("teachers", teacher.id, { name: teacher.name, email: teacher.email, phone: teacher.phone });
+    if (user?.dbId) dbUpdate("app_users", user.dbId, { name: teacher.name, password_hash: teacher.password });
     saveState("Updated teacher profile details");
   }
   if (session.role === "parent") {
@@ -1531,6 +1615,8 @@ function saveProfile(event) {
       session.name = parent.name;
       session.password = parent.password;
     }
+    dbUpdate("parents", parent.id, { name: parent.name, email: parent.email, phone: parent.phone });
+    if (user?.dbId) dbUpdate("app_users", user.dbId, { name: parent.name, password_hash: parent.password });
     saveState("Updated parent profile details");
   }
   closeProfileModal();
