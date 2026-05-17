@@ -281,11 +281,16 @@ function updateHeader() {
   el("#headerIdentity").innerHTML = `
     <span class="identity-avatar">${escapeHtml(profile.initials)}</span>
     <div>
-      <p class="eyebrow" id="activeRole">${session?.role === "platform" ? "Platform Administration" : session?.role === "admin" ? "School Login" : session?.role === "teacher" ? "Teacher Login" : "Parent Login"}</p>
+      <p class="eyebrow" id="activeRole">${session?.role === "platform" ? "Platform Administration" : session?.role === "admin" ? "School Admin" : session?.role === "teacher" ? "Teacher Portal" : "Parent Portal"}</p>
       <h2 id="dashboardTitle">${escapeHtml(profile.title)}</h2>
       <p class="identity-meta">${escapeHtml(profile.meta)}</p>
     </div>
   `;
+  const headerActions = document.querySelector(".header-actions");
+  if (headerActions) {
+    const themeSelect = el("#themeSelect");
+    if (themeSelect) themeSelect.value = activeTheme;
+  }
   const schoolChip = document.querySelector(".school-chip");
   if (schoolChip) {
     schoolChip.innerHTML = `
@@ -306,24 +311,25 @@ function statCards(items) {
 
 function navIcon(key) {
   const icons = {
-    overview: "01",
-    setup: "02",
-    schools: "02",
-    requests: "03",
-    teachers: "03",
-    students: "04",
-    exams: "05",
-    attendance: "06",
-    fees: "07",
-    timetable: "08",
-    notices: "09",
-    reports: "10",
-    marks: "%",
-    homework: "HW",
-    papers: "QP",
-    parents: "PR"
+    overview: "dashboard",
+    setup: "settings",
+    schools: "building",
+    requests: "inbox",
+    teachers: "users",
+    students: "user",
+    exams: "file",
+    attendance: "check",
+    fees: "dollar",
+    timetable: "clock",
+    notices: "bell",
+    reports: "chart",
+    marks: "percent",
+    homework: "edit",
+    papers: "file",
+    parents: "users"
   };
-  return icons[key] || "--";
+  const iconId = icons[key] || "dashboard";
+  return `<svg width="16" height="16"><use href="#icon-${iconId}"/></svg>`;
 }
 
 function tabs(items) {
