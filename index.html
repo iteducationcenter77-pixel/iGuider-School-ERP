@@ -86,7 +86,7 @@
   </main>
 
   <section id="authPage" class="auth-page" hidden>
-    <button class="back-link" data-view="public" type="button">
+    <button class="back-link" data-view="public" type="button" id="authBackBtn">
       <svg width="14" height="14"><use href="#icon-arrow-left"/></svg>
       Back to website
     </button>
@@ -94,8 +94,8 @@
     <div class="login-panel premium-plate">
       <div class="section-heading compact">
         <p class="eyebrow">Welcome back</p>
-        <h2>Login to iGuider</h2>
-        <p class="mini-text">Choose a role and enter the credentials issued by the school.</p>
+        <h2 id="authTitle">Login to iGuider</h2>
+        <p class="mini-text" id="authCopy">Choose a role and enter the credentials issued by the school.</p>
       </div>
       <form id="loginForm" class="login-form">
         <label>
@@ -116,7 +116,7 @@
         </label>
         <button class="primary-btn full" type="submit">Log In</button>
       </form>
-      <p class="mini-text" style="margin-top: var(--space-md); text-align:center;">
+      <p class="mini-text" id="authSignupLink" style="margin-top: var(--space-md); text-align:center;">
         Don't have an account? <a href="#" data-view="getstarted" style="color:var(--accent);font-weight:600;text-decoration:none;">Get Started</a>
       </p>
     </div>

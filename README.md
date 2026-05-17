@@ -1,6 +1,6 @@
 # iGuider School ERP
 
-iGuider School ERP is a browser-based school management system prototype with platform administration, school administration, teacher, and parent portals.
+iGuider School ERP is a deployed browser-based school management system with platform administration, school administration, teacher, and parent portals backed by Supabase.
 
 ## Included
 
@@ -13,16 +13,10 @@ iGuider School ERP is a browser-based school management system prototype with pl
 - Teacher, student, parent, subject, exam, marks, attendance, homework, fees, timetable, notice, and report modules
 - Supabase schema and client configuration template
 
-## Local Run
+## Routes
 
-Open `index.html` in a browser.
-
-Default local credentials:
-
-- Platform Administration: `platform` / `admin123`
-- School Admin: `admin` / `admin123`
-- Teacher: `anita` / `teach123`
-- Parent: `parent1` / `parent123`
+- Public website and school login: `/`
+- Platform administration: `/admin`
 
 ## Supabase Setup
 
@@ -31,13 +25,15 @@ Default local credentials:
 3. Run `supabase-schema.sql`.
 4. Copy `supabase-config.example.js` to `supabase-config.js`.
 5. Replace the project URL and anon key in `supabase-config.js`.
-6. Update `index.html` to load `supabase-config.js` instead of `supabase-config.example.js` before deployment.
+6. Add a platform administrator in `app_users` with role `platform`, or set `PLATFORM_ADMIN_USERNAME` and `PLATFORM_ADMIN_PASSWORD` in Vercel so the first `/admin` login can create the platform user row.
 
-The current front-end keeps local browser persistence as a fallback. The schema is ready for connecting the UI modules to Supabase tables.
+Supabase is the source of truth. The app does not use browser storage for school, user, academic, fee, attendance, or platform records.
+
+If you want the old demo school records in Supabase for review, run `supabase-demo-seed.sql` once from the Supabase SQL editor. The live app does not auto-seed demo records.
 
 ## Deployment
 
-This is a static front-end project. Deploy the following files to any static hosting provider:
+This is a static front-end project. Vercel runs `node build.js`, which generates `supabase-config.js` from environment variables.
 
 - `index.html`
 - `styles.css`
@@ -45,4 +41,3 @@ This is a static front-end project. Deploy the following files to any static hos
 - `supabase-config.js`
 
 Keep `supabase-schema.sql` and `README.md` in the repository for setup and maintenance.
-

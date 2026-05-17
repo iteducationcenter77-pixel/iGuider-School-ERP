@@ -1,12 +1,10 @@
-const STORAGE_KEY = "iguider-school-production-v1";
-
-const seedData = {
+const DEFAULT_STATE = {
   school: {
-    name: "iGuider International School",
-    code: "IGS-2026",
-    session: "2026-2027",
-    board: "CBSE",
-    city: "New Delhi",
+    name: "iGuider School",
+    code: "",
+    session: "",
+    board: "",
+    city: "",
     website: {
       heroEyebrow: "Premium school operations platform",
       heroTitle: "iGuider School Management System",
@@ -15,79 +13,22 @@ const seedData = {
       heroImage: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1800&q=88"
     }
   },
-  users: [
-    { role: "platform", username: window.IGUIDER_SUPABASE?.platformUsername || "platform", password: window.IGUIDER_SUPABASE?.platformPassword || "admin123", name: "iGuider Platform Admin" },
-    { role: "admin", username: "admin", password: "admin123", name: "School Admin" },
-    { role: "teacher", username: "anita", password: "teach123", teacherId: "t1", name: "Anita Sharma" },
-    { role: "teacher", username: "rohan", password: "teach123", teacherId: "t2", name: "Rohan Mehta" },
-    { role: "parent", username: "parent1", password: "parent123", parentId: "p1", name: "Rahul Verma" }
-  ],
-  classes: [
-    { id: "c1", name: "8A", grade: "8", section: "A", room: "204", classTeacherId: "t1" },
-    { id: "c2", name: "9A", grade: "9", section: "A", room: "301", classTeacherId: "t1" },
-    { id: "c3", name: "10A", grade: "10", section: "A", room: "402", classTeacherId: "t2" }
-  ],
-  subjects: [
-    { id: "sub1", name: "Mathematics", code: "MATH" },
-    { id: "sub2", name: "Science", code: "SCI" },
-    { id: "sub3", name: "English", code: "ENG" },
-    { id: "sub4", name: "Social Science", code: "SST" }
-  ],
-  teachers: [
-    { id: "t1", name: "Anita Sharma", username: "anita", password: "teach123", email: "anita@iguider.edu", phone: "9876541111", subjects: ["Mathematics"], classes: ["8A", "9A"], classTeacherOf: "8A", status: "Active" },
-    { id: "t2", name: "Rohan Mehta", username: "rohan", password: "teach123", email: "rohan@iguider.edu", phone: "9876542222", subjects: ["Science"], classes: ["8A", "10A"], classTeacherOf: "10A", status: "Active" }
-  ],
-  students: [
-    { id: "s1", admissionNo: "IG-1001", name: "Aarav Verma", className: "8A", rollNo: "08", parentId: "p1", dob: "2013-03-11", status: "Active" },
-    { id: "s2", admissionNo: "IG-1002", name: "Meera Singh", className: "8A", rollNo: "12", parentId: "p2", dob: "2013-08-24", status: "Active" },
-    { id: "s3", admissionNo: "IG-1003", name: "Kabir Khan", className: "10A", rollNo: "03", parentId: "p3", dob: "2011-01-19", status: "Active" }
-  ],
-  parents: [
-    { id: "p1", name: "Rahul Verma", username: "parent1", password: "parent123", phone: "9876543210", email: "rahul@example.com" },
-    { id: "p2", name: "Priya Singh", username: "parent2", password: "parent123", phone: "9876500012", email: "priya@example.com" },
-    { id: "p3", name: "Sameer Khan", username: "parent3", password: "parent123", phone: "9876505512", email: "sameer@example.com" }
-  ],
-  notices: [
-    { id: "n1", title: "Unit Test Schedule", audience: "Class 8A", priority: "High", message: "Class tests begin from Monday. Please check the portal for marks updates.", date: "2026-05-15" },
-    { id: "n2", title: "Fee Reminder", audience: "All Parents", priority: "Normal", message: "Quarterly fee payment window closes this Friday.", date: "2026-05-12" }
-  ],
-  exams: [
-    { id: "e1", name: "Unit Test 1", type: "Class Test", className: "8A", max: 50, date: "2026-05-20", status: "Scheduled" },
-    { id: "e2", name: "Mid Term", type: "Exam", className: "8A", max: 100, date: "2026-07-10", status: "Scheduled" }
-  ],
-  marks: [
-    { id: "m1", examId: "e1", studentId: "s1", className: "8A", subject: "Mathematics", type: "Class Test", title: "Algebra Test", score: 42, max: 50, published: true },
-    { id: "m2", examId: "e2", studentId: "s1", className: "8A", subject: "Science", type: "Exam", title: "Mid Term", score: 78, max: 100, published: true },
-    { id: "m3", examId: "e1", studentId: "s2", className: "8A", subject: "Mathematics", type: "Class Test", title: "Algebra Test", score: 39, max: 50, published: true }
-  ],
-  attendance: [
-    { id: "a1", studentId: "s1", className: "8A", date: "2026-05-15", status: "Present", note: "" },
-    { id: "a2", studentId: "s2", className: "8A", date: "2026-05-15", status: "Absent", note: "Medical leave" },
-    { id: "a3", studentId: "s3", className: "10A", date: "2026-05-15", status: "Present", note: "" }
-  ],
-  homework: [
-    { id: "h1", teacherId: "t1", className: "8A", subject: "Mathematics", title: "Linear Equations Practice", dueDate: "2026-05-18", details: "Complete questions 1 to 20 from exercise 2.3." }
-  ],
-  fees: [
-    { id: "f1", studentId: "s1", term: "Quarter 1", amount: 18000, paid: 12000, dueDate: "2026-05-30", status: "Partially Paid" },
-    { id: "f2", studentId: "s2", term: "Quarter 1", amount: 18000, paid: 18000, dueDate: "2026-05-30", status: "Paid" },
-    { id: "f3", studentId: "s3", term: "Quarter 1", amount: 22000, paid: 0, dueDate: "2026-05-30", status: "Due" }
-  ],
-  timetable: [
-    { id: "tt1", className: "8A", day: "Monday", period: "1", subject: "Mathematics", teacherId: "t1", time: "08:30 - 09:15" },
-    { id: "tt2", className: "8A", day: "Monday", period: "2", subject: "Science", teacherId: "t2", time: "09:15 - 10:00" },
-    { id: "tt3", className: "10A", day: "Tuesday", period: "1", subject: "Science", teacherId: "t2", time: "08:30 - 09:15" }
-  ],
-  papers: [
-    { id: "q1", teacherId: "t1", className: "8A", subject: "Mathematics", title: "Algebra Practice Paper", duration: "60 minutes", max: "50", questions: "Section A\n1. Solve five linear equations.\n2. Factorise the given expressions.\n\nSection B\n3. Attempt the word problems." }
-  ],
-  auditLogs: [
-    { id: "log1", actor: "School Admin", action: "Initialized academic session 2026-2027", date: "2026-05-15" }
-  ],
-  schools: [
-    { id: "school-main", name: "iGuider International School", code: "IGS-2026", city: "New Delhi", contactName: "School Admin", email: "admin@iguider.edu", mobile: "9876540000", status: "Active", plan: "Premium", joined: "2026-05-15" },
-    { id: "school-2", name: "North Valley Public School", code: "NVP-2026", city: "Jaipur", contactName: "Kavita Rao", email: "kavita@nvp.edu", mobile: "9876508899", status: "Pending", plan: "Trial", joined: "2026-05-14" }
-  ]
+  users: [],
+  classes: [],
+  subjects: [],
+  teachers: [],
+  students: [],
+  parents: [],
+  notices: [],
+  exams: [],
+  marks: [],
+  attendance: [],
+  homework: [],
+  fees: [],
+  timetable: [],
+  papers: [],
+  auditLogs: [],
+  schools: []
 };
 
 /* ═══════════════════════════════════════════════════════
@@ -98,8 +39,8 @@ const sb = sbConfig.url && sbConfig.anonKey && window.supabase
   ? window.supabase.createClient(sbConfig.url, sbConfig.anonKey)
   : null;
 
-if (sb) console.log("✓ Supabase connected:", sbConfig.url);
-else console.warn("⚠ Supabase not configured — using localStorage only");
+if (sb) console.log("Supabase connected:", sbConfig.url);
+else console.warn("Supabase is not configured. Deployed data operations require SUPABASE_URL and SUPABASE_ANON_KEY.");
 
 // Snake ↔ Camel case converters
 const toSnake = (s) => s.replace(/([A-Z])/g, "_$1").toLowerCase();
@@ -138,7 +79,13 @@ const TABLE_MAP = {
   auditLogs: "audit_logs"
 };
 
-// CRUD helpers — all return silently on failure so localStorage fallback works
+function requireSupabase() {
+  if (sb) return true;
+  alert("Supabase is not configured. Please set SUPABASE_URL and SUPABASE_ANON_KEY in Vercel.");
+  return false;
+}
+
+// CRUD helpers. Supabase is the deployed source of truth.
 async function dbSelect(table) {
   if (!sb) return null;
   try {
@@ -188,7 +135,7 @@ async function dbDelete(table, id) {
 // Fetch all data from Supabase and merge into state
 async function syncFromSupabase() {
   if (!sb) return;
-  console.log("⏳ Syncing from Supabase...");
+  console.log("Syncing from Supabase...");
   try {
     const [schools, profiles, users, teachers, students, parents,
            classes, subjects, notices, exams, marks, attendance,
@@ -212,152 +159,73 @@ async function syncFromSupabase() {
       dbSelect("audit_logs")
     ]);
 
-    if (schools?.length) state.schools = schools;
+    const activeSchoolId = session?.role === "platform" ? null : session?.schoolId || null;
+    const bySchool = (rows) => activeSchoolId ? (rows || []).filter((row) => row.schoolId === activeSchoolId) : (rows || []);
+
+    state.schools = schools || [];
     if (profiles?.length) {
-      const p = profiles[0];
+      const p = activeSchoolId
+        ? profiles.find((profile) => profile.id === activeSchoolId) || profiles[0]
+        : profiles[0];
       state.school = { ...state.school, name: p.name, code: p.code, session: p.session, board: p.board, city: p.city, dbId: p.id, platformSchoolId: p.platformSchoolId };
     }
-    if (users?.length) {
-      state.users = users.map(u => ({
+    state.users = (users || [])
+      .filter((u) => session?.role === "platform" || !activeSchoolId || u.schoolId === activeSchoolId || u.role === "platform")
+      .map((u) => ({
         role: u.role, username: u.username, password: u.passwordHash || u.password || "",
         name: u.name, teacherId: u.teacherId, parentId: u.parentId, dbId: u.id, schoolId: u.schoolId
       }));
-    }
-    if (teachers?.length) state.teachers = teachers.map(t => ({
+    state.teachers = bySchool(teachers).map((t) => ({
       id: t.id, name: t.name, username: t.username, email: t.email, phone: t.phone,
       subjects: t.subjects || [], classes: t.classes || [], classTeacherOf: t.classTeacherOf,
       status: t.status || "Active", password: ""
     }));
-    if (students?.length) state.students = students.map(s => ({
+    state.students = bySchool(students).map((s) => ({
       id: s.id, admissionNo: s.admissionNo, name: s.name, className: s.className,
       rollNo: s.rollNo, parentId: s.parentId, dob: s.dob, status: s.status || "Active"
     }));
-    if (parents?.length) state.parents = parents.map(p => ({
+    state.parents = bySchool(parents).map((p) => ({
       id: p.id, name: p.name, username: p.username, phone: p.phone, email: p.email, password: ""
     }));
-    if (classes?.length) state.classes = classes.map(c => ({
+    state.classes = bySchool(classes).map((c) => ({
       id: c.id, name: c.name, grade: c.grade, section: c.section, room: c.room, classTeacherId: c.classTeacherId
     }));
-    if (subjects?.length) state.subjects = subjects.map(s => ({ id: s.id, name: s.name, code: s.code }));
-    if (notices?.length) state.notices = notices.map(n => ({
+    state.subjects = bySchool(subjects).map((s) => ({ id: s.id, name: s.name, code: s.code }));
+    state.notices = bySchool(notices).map((n) => ({
       id: n.id, title: n.title, audience: n.audience, priority: n.priority, message: n.message, date: n.noticeDate
     }));
-    if (exams?.length) state.exams = exams.map(e => ({
+    state.exams = bySchool(exams).map((e) => ({
       id: e.id, name: e.name, type: e.type, className: e.className, max: e.maxMarks, date: e.examDate, status: e.status
     }));
-    if (marks?.length) state.marks = marks.map(m => ({
+    state.marks = bySchool(marks).map((m) => ({
       id: m.id, examId: m.examId, studentId: m.studentId, className: m.className,
       subject: m.subject, type: m.type, title: m.title, score: m.score, max: m.maxMarks, published: m.published
     }));
-    if (attendance?.length) state.attendance = attendance.map(a => ({
+    state.attendance = bySchool(attendance).map((a) => ({
       id: a.id, studentId: a.studentId, className: a.className, date: a.attendanceDate, status: a.status, note: a.note
     }));
-    if (homework?.length) state.homework = homework.map(h => ({
+    state.homework = bySchool(homework).map((h) => ({
       id: h.id, teacherId: h.teacherId, className: h.className, subject: h.subject,
       title: h.title, dueDate: h.dueDate, details: h.details
     }));
-    if (fees?.length) state.fees = fees.map(f => ({
+    state.fees = bySchool(fees).map((f) => ({
       id: f.id, studentId: f.studentId, term: f.term, amount: f.amount, paid: f.paid, dueDate: f.dueDate, status: f.status
     }));
-    if (timetable?.length) state.timetable = timetable.map(t => ({
+    state.timetable = bySchool(timetable).map((t) => ({
       id: t.id, className: t.className, day: t.day, period: t.period, subject: t.subject, teacherId: t.teacherId, time: t.time
     }));
-    if (papers?.length) state.papers = papers.map(p => ({
+    state.papers = bySchool(papers).map((p) => ({
       id: p.id, teacherId: p.teacherId, className: p.className, subject: p.subject,
       title: p.title, duration: p.duration, max: p.maxMarks, questions: p.questions
     }));
-    if (logs?.length) state.auditLogs = logs.map(l => ({ id: l.id, actor: l.actor, action: l.action, date: l.logDate }));
-    // If Supabase has no data at all, seed it from localStorage seed data
-    const hasData = schools?.length || profiles?.length || users?.length;
-    if (!hasData) {
-      console.log("📦 Supabase empty — pushing seed data...");
-      await seedSupabase();
-      return; // seedSupabase will re-trigger sync
-    }
+    state.auditLogs = bySchool(logs).map((l) => ({ id: l.id, actor: l.actor, action: l.action, date: l.logDate }));
 
-    // Cache to localStorage
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    console.log("✓ Supabase sync complete");
-
-    // Re-render if we're on a dashboard
+    console.log("Supabase sync complete");
     if (session) renderDashboard();
     refreshHeroMetrics();
     updatePublicWebsite();
   } catch (e) {
     console.error("Supabase sync failed:", e);
-  }
-}
-
-// Push seed data to Supabase on first run
-async function seedSupabase() {
-  if (!sb) return;
-  try {
-    // 1. Create platform school
-    const school = state.schools[0];
-    const dbSchool = await dbInsert("platform_schools", {
-      name: school.name, code: school.code, city: school.city || "New Delhi",
-      contact_name: school.contactName || school.name, email: school.email || "",
-      mobile: school.mobile || "", status: school.status || "Active",
-      plan: school.plan || "Trial"
-    });
-    const platformSchoolId = dbSchool?.id || null;
-
-    // 2. Create school profile
-    const sp = state.school;
-    const dbProfile = await dbInsert("school_profiles", {
-      platform_school_id: platformSchoolId,
-      name: sp.name, code: sp.code, session: sp.session, board: sp.board, city: sp.city
-    });
-    const schoolDbId = dbProfile?.id || null;
-    state.school.dbId = schoolDbId;
-
-    // 3. Create all users
-    for (const u of state.users) {
-      const userRow = { school_id: schoolDbId, role: u.role, name: u.name, username: u.username, password_hash: u.password };
-      if (u.role === "teacher") {
-        const dbTeacher = state.teachers.find(t => t.username === u.username);
-        if (dbTeacher) {
-          const inserted = await dbInsert("teachers", {
-            school_id: schoolDbId, name: dbTeacher.name, username: dbTeacher.username,
-            email: dbTeacher.email || "", phone: dbTeacher.phone || "",
-            subjects: dbTeacher.subjects || [], classes: dbTeacher.classes || [],
-            class_teacher_of: dbTeacher.classTeacherOf || "", status: dbTeacher.status || "Active"
-          });
-          if (inserted?.id) userRow.teacher_id = inserted.id;
-        }
-      }
-      if (u.role === "parent") {
-        const dbParent = state.parents.find(p => p.username === u.username);
-        if (dbParent) {
-          const inserted = await dbInsert("parents", {
-            school_id: schoolDbId, name: dbParent.name, username: dbParent.username,
-            email: dbParent.email || "", phone: dbParent.phone || ""
-          });
-          if (inserted?.id) userRow.parent_id = inserted.id;
-        }
-      }
-      await dbInsert("app_users", userRow);
-    }
-
-    // 4. Seed classes, subjects, students, etc.
-    for (const c of state.classes) await dbInsert("classes", { school_id: schoolDbId, name: c.name, grade: c.grade, section: c.section, room: c.room || "" });
-    for (const s of state.subjects) await dbInsert("subjects", { school_id: schoolDbId, name: s.name, code: s.code });
-    for (const s of state.students) await dbInsert("students", { school_id: schoolDbId, admission_no: s.admissionNo || "", name: s.name, class_name: s.className, roll_no: s.rollNo || "", dob: s.dob || null, status: s.status || "Active" });
-    for (const n of state.notices) await dbInsert("notices", { school_id: schoolDbId, title: n.title, audience: n.audience, priority: n.priority, message: n.message, notice_date: n.date });
-    for (const e of state.exams) await dbInsert("exams", { school_id: schoolDbId, name: e.name, type: e.type, class_name: e.className, max_marks: e.max, exam_date: e.date || null, status: e.status });
-    for (const m of state.marks) await dbInsert("marks", { school_id: schoolDbId, class_name: m.className, subject: m.subject, type: m.type, title: m.title, score: m.score, max_marks: m.max, published: m.published !== false });
-    for (const a of state.attendance) await dbInsert("attendance", { school_id: schoolDbId, class_name: a.className, attendance_date: a.date, status: a.status, note: a.note || "" });
-    for (const h of state.homework) await dbInsert("homework", { school_id: schoolDbId, class_name: h.className, subject: h.subject, title: h.title, due_date: h.dueDate || null, details: h.details || "" });
-    for (const f of state.fees) await dbInsert("fees", { school_id: schoolDbId, term: f.term, amount: f.amount, paid: f.paid || 0, due_date: f.dueDate || null, status: f.status });
-    for (const t of state.timetable) await dbInsert("timetable", { school_id: schoolDbId, class_name: t.className, day: t.day, period: t.period, subject: t.subject, time: t.time || "" });
-    for (const p of state.papers) await dbInsert("question_papers", { school_id: schoolDbId, class_name: p.className, subject: p.subject, title: p.title, duration: p.duration || "", max_marks: p.max || "", questions: p.questions || "" });
-    for (const l of state.auditLogs) await dbInsert("audit_logs", { school_id: schoolDbId, actor: l.actor, action: l.action, log_date: l.date });
-
-    console.log("✓ Seed data pushed to Supabase");
-    // Re-sync to get proper UUIDs from the database
-    await syncFromSupabase();
-  } catch (e) {
-    console.error("Seed to Supabase failed:", e);
   }
 }
 
@@ -369,10 +237,11 @@ function getSchoolDbId() {
 let state = loadState();
 let session = null;
 let activeTab = "overview";
-let activeTheme = localStorage.getItem("iguider-theme") || "default";
+let activeTheme = "default";
 
 const el = (selector) => document.querySelector(selector);
 const id = (prefix = "id") => `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+const isPlatformAdminRoute = () => window.location.pathname.replace(/\/+$/, "").endsWith("/admin") || window.location.hash === "#admin";
 
 function showPublicPage() {
   el("#publicPage").hidden = false;
@@ -389,15 +258,31 @@ function showAuthPage() {
   el("#getStartedPage").hidden = true;
   el("#appPage").hidden = true;
   document.querySelector("[data-public]").hidden = true;
-  // Check for /admin or #admin — inject Platform Administration option
-  const isAdmin = window.location.pathname.includes("/admin") || window.location.hash === "#admin";
+
+  const isAdmin = isPlatformAdminRoute();
   const roleSelect = el("#roleSelect");
-  if (isAdmin && !roleSelect.querySelector('option[value="platform"]')) {
-    const opt = document.createElement("option");
-    opt.value = "platform";
-    opt.textContent = "Platform Administration";
-    roleSelect.insertBefore(opt, roleSelect.firstChild);
+  const title = el("#authTitle");
+  const copy = el("#authCopy");
+  const back = el("#authBackBtn");
+  const signup = el("#authSignupLink");
+
+  if (isAdmin) {
+    roleSelect.innerHTML = '<option value="platform">Platform Administration</option>';
     roleSelect.value = "platform";
+    title.textContent = "Platform Administration";
+    copy.textContent = "Sign in to manage school activation, deactivation, and platform records.";
+    back.hidden = true;
+    signup.hidden = true;
+  } else {
+    roleSelect.innerHTML = [
+      '<option value="admin">School Admin</option>',
+      '<option value="teacher">Teacher</option>',
+      '<option value="parent">Parent</option>'
+    ].join("");
+    title.textContent = "Login to iGuider";
+    copy.textContent = "Choose a role and enter the credentials issued by the school.";
+    back.hidden = false;
+    signup.hidden = false;
   }
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -424,54 +309,43 @@ function applyTheme(theme) {
   activeTheme = theme || "default";
   document.body.dataset.theme = activeTheme;
   document.documentElement.dataset.theme = activeTheme;
-  localStorage.setItem("iguider-theme", activeTheme);
   const selector = el("#themeSelect");
   if (selector) selector.value = activeTheme;
 }
 
 function loadState() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(seedData));
-    return structuredClone(seedData);
-  }
-  try {
-    return normalizeState(JSON.parse(raw));
-  } catch {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(seedData));
-    return structuredClone(seedData);
-  }
+  return structuredClone(DEFAULT_STATE);
 }
 
 function normalizeState(data) {
   const school = {
-    ...seedData.school,
+    ...DEFAULT_STATE.school,
     ...(data.school || {}),
     website: {
-      ...seedData.school.website,
+      ...DEFAULT_STATE.school.website,
       ...((data.school || {}).website || {})
     }
   };
   return {
-    ...structuredClone(seedData),
+    ...structuredClone(DEFAULT_STATE),
     ...data,
     school,
-    users: data.users || seedData.users,
-    teachers: data.teachers || seedData.teachers,
-    students: data.students || seedData.students,
-    parents: data.parents || seedData.parents,
-    classes: data.classes || seedData.classes,
-    subjects: data.subjects || seedData.subjects,
-    notices: data.notices || seedData.notices,
-    exams: data.exams || seedData.exams,
-    marks: data.marks || seedData.marks,
-    attendance: data.attendance || seedData.attendance,
-    homework: data.homework || seedData.homework,
-    fees: data.fees || seedData.fees,
-    timetable: data.timetable || seedData.timetable,
-    papers: data.papers || seedData.papers,
-    auditLogs: data.auditLogs || seedData.auditLogs,
-    schools: data.schools || seedData.schools
+    users: data.users || DEFAULT_STATE.users,
+    teachers: data.teachers || DEFAULT_STATE.teachers,
+    students: data.students || DEFAULT_STATE.students,
+    parents: data.parents || DEFAULT_STATE.parents,
+    classes: data.classes || DEFAULT_STATE.classes,
+    subjects: data.subjects || DEFAULT_STATE.subjects,
+    notices: data.notices || DEFAULT_STATE.notices,
+    exams: data.exams || DEFAULT_STATE.exams,
+    marks: data.marks || DEFAULT_STATE.marks,
+    attendance: data.attendance || DEFAULT_STATE.attendance,
+    homework: data.homework || DEFAULT_STATE.homework,
+    fees: data.fees || DEFAULT_STATE.fees,
+    timetable: data.timetable || DEFAULT_STATE.timetable,
+    papers: data.papers || DEFAULT_STATE.papers,
+    auditLogs: data.auditLogs || DEFAULT_STATE.auditLogs,
+    schools: data.schools || DEFAULT_STATE.schools
   };
 }
 
@@ -481,7 +355,6 @@ function saveState(action = "") {
     state.auditLogs.unshift(logEntry);
     dbInsert("audit_logs", { school_id: getSchoolDbId(), actor: logEntry.actor, action, log_date: today() });
   }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   refreshHeroMetrics();
 }
 
@@ -496,7 +369,7 @@ function refreshHeroMetrics() {
 }
 
 function updatePublicWebsite() {
-  const website = state.school.website || seedData.school.website;
+  const website = state.school.website || DEFAULT_STATE.school.website;
   el("#publicHeroEyebrow").textContent = website.heroEyebrow;
   el("#publicHeroTitle").textContent = website.heroTitle;
   el("#publicHeroCopy").textContent = website.heroCopy;
@@ -692,6 +565,33 @@ function renderPlatformAdmin() {
             <p class="mini-text">Activate, deactivate, and monitor schools using the iGuider platform.</p>
           </div>
         </div>
+        <form class="form-grid compact-form" data-action="add-platform-school">
+          <label>School Name<input name="name" required></label>
+          <label>School Code<input name="code" required></label>
+          <label>Session<input name="session" placeholder="2026-2027" required></label>
+          <label>Board<input name="board" placeholder="CBSE"></label>
+          <label>City<input name="city"></label>
+          <label>Contact Name<input name="contactName" required></label>
+          <label>Email<input name="email" type="email"></label>
+          <label>Mobile<input name="mobile"></label>
+          <label>Admin Username<input name="adminUsername" required></label>
+          <label>Admin Password<input name="adminPassword" required></label>
+          <label>Plan
+            <select name="plan">
+              <option>Trial</option>
+              <option>Premium</option>
+              <option>Enterprise</option>
+            </select>
+          </label>
+          <label>Status
+            <select name="status">
+              <option>Pending</option>
+              <option>Active</option>
+              <option>Inactive</option>
+            </select>
+          </label>
+          <button class="primary-btn" type="submit">Add School</button>
+        </form>
         ${platformSchoolList(state.schools, true)}
       </div>
     `,
@@ -802,7 +702,7 @@ function renderAdmin() {
         <form class="form-grid" data-action="add-teacher">
           <label>Name<input name="name" required></label>
           <label>Username<input name="username" required></label>
-          <label>Password<input name="password" required value="teach123"></label>
+          <label>Password<input name="password" required></label>
           <label>Email<input name="email" type="email"></label>
           <label>Phone<input name="phone"></label>
           <label>Subjects<input name="subjects" placeholder="Mathematics, Science" required></label>
@@ -1049,7 +949,7 @@ function renderTeacher() {
         <form class="form-grid" data-action="add-parent">
           <label>Name<input name="name" required></label>
           <label>Username<input name="username" required></label>
-          <label>Password<input name="password" required value="parent123"></label>
+          <label>Password<input name="password" required></label>
           <label>Phone<input name="phone" required></label>
           <label>Email<input name="email" type="email"></label>
           <button class="primary-btn" type="submit">Add Parent</button>
@@ -1421,18 +1321,25 @@ async function handleLogin(event) {
   const username = el("#usernameInput").value.trim();
   const password = el("#passwordInput").value;
 
-  // Try Supabase first, fall back to localStorage
-  let user = null;
-  if (sb) {
-    try {
-      const { data, error } = await sb.from("app_users").select("*").eq("role", role).eq("username", username).eq("password_hash", password).maybeSingle();
-      if (!error && data) {
-        user = { role: data.role, username: data.username, password: data.password_hash, name: data.name, teacherId: data.teacher_id, parentId: data.parent_id, dbId: data.id, schoolId: data.school_id };
-      }
-    } catch (e) { console.error("Supabase login query failed:", e); }
+  if (!requireSupabase()) return;
+  if (role === "platform" && !isPlatformAdminRoute()) {
+    alert("Platform administration is only available at /admin.");
+    return;
   }
-  if (!user) {
-    user = state.users.find((item) => item.role === role && item.username === username && item.password === password);
+
+  let user = null;
+  try {
+    const { data, error } = await sb.from("app_users").select("*").eq("role", role).eq("username", username).eq("password_hash", password).maybeSingle();
+    if (!error && data) {
+      user = { role: data.role, username: data.username, password: data.password_hash, name: data.name, teacherId: data.teacher_id, parentId: data.parent_id, dbId: data.id, schoolId: data.school_id };
+    }
+  } catch (e) { console.error("Supabase login query failed:", e); }
+
+  const envPlatformUser = sbConfig.platformUsername || "platform";
+  const envPlatformPassword = sbConfig.platformPassword || "";
+  if (!user && role === "platform" && username === envPlatformUser && password === envPlatformPassword) {
+    const inserted = await dbInsert("app_users", { role: "platform", name: "iGuider Platform Admin", username, password_hash: password });
+    user = { role: "platform", username, password, name: "iGuider Platform Admin", dbId: inserted?.id };
   }
 
   if (!user) {
@@ -1440,23 +1347,26 @@ async function handleLogin(event) {
     return;
   }
 
+  session = user;
+  await syncFromSupabase();
+
   if (user.role === "admin") {
-    const school = state.schools.find((item) => item.code === state.school.code) || state.schools[0];
+    const schoolProfile = state.school;
+    const school = state.schools.find((item) => item.id === schoolProfile.platformSchoolId || item.code === schoolProfile.code);
     if (school?.status !== "Active") {
+      session = null;
       alert("This school account is currently inactive. Please contact iGuider administration.");
       return;
     }
   }
 
-  session = user;
   activeTab = "overview";
   renderDashboard();
-  // Sync data from Supabase in background after login
-  syncFromSupabase();
 }
 
-function handleSignup(event) {
+async function handleSignup(event) {
   event.preventDefault();
+  if (!requireSupabase()) return;
   const form = event.currentTarget;
   const schoolName = formValue(form, "schoolName");
   const email = formValue(form, "email");
@@ -1467,26 +1377,21 @@ function handleSignup(event) {
     alert("Please provide either an email address or a mobile number.");
     return;
   }
-  const schoolId = id("school");
   const schoolCode = `IG-${Math.floor(1000 + Math.random() * 9000)}`;
   const contactName = formValue(form, "contactName");
   const schoolEntry = {
-    id: schoolId, name: schoolName, code: schoolCode, city: "Not provided",
+    name: schoolName, code: schoolCode, city: "Not provided",
     contactName, email, mobile, status: "Pending", plan: "Trial", joined: today()
   };
-  state.schools.unshift(schoolEntry);
-  state.users.push({ role: "admin", username, password, name: contactName, schoolId });
-  // Insert into Supabase
-  (async () => {
-    const dbSchool = await dbInsert("platform_schools", { name: schoolName, code: schoolCode, city: "Not provided", contact_name: contactName, email, mobile, status: "Pending", plan: "Trial" });
-    const sId = dbSchool?.id || null;
-    if (sId) {
-      const dbProfile = await dbInsert("school_profiles", { platform_school_id: sId, name: schoolName, code: schoolCode, session: "2026-2027", board: "Not set", city: "Not provided" });
-      if (dbProfile?.id) {
-        await dbInsert("app_users", { school_id: dbProfile.id, role: "admin", name: contactName, username, password_hash: password });
-      }
+  const dbSchool = await dbInsert("platform_schools", { name: schoolName, code: schoolCode, city: "Not provided", contact_name: contactName, email, mobile, status: "Pending", plan: "Trial", joined: today() });
+  const sId = dbSchool?.id || null;
+  if (sId) {
+    const dbProfile = await dbInsert("school_profiles", { platform_school_id: sId, name: schoolName, code: schoolCode, session: "2026-2027", board: "Not set", city: "Not provided" });
+    if (dbProfile?.id) {
+      await dbInsert("app_users", { school_id: dbProfile.id, role: "admin", name: contactName, username, password_hash: password });
     }
-  })();
+  }
+  state.schools.unshift({ ...schoolEntry, id: sId });
   saveState(`Received signup request from ${schoolName}`);
   form.reset();
   alert("Signup request submitted. iGuider administration will review and activate the school account.");
@@ -1578,6 +1483,7 @@ function saveProfile(event) {
   event.preventDefault();
   const form = event.currentTarget;
   if (!session) return;
+  if (!requireSupabase()) return;
   if (session.role === "platform") {
     const user = state.users.find((item) => item.role === "platform" && item.username === session.username);
     if (user) {
@@ -1637,13 +1543,68 @@ function saveProfile(event) {
   renderDashboard();
 }
 
-function handleSubmit(event) {
+async function handleSubmit(event) {
   const form = event.target.closest("form[data-action]");
   if (!form) return;
   event.preventDefault();
   const action = form.dataset.action;
   const teacher = currentTeacher();
   const sid = getSchoolDbId();
+
+  if (!requireSupabase()) return;
+
+  if (action === "add-platform-school") {
+    const entry = {
+      name: formValue(form, "name"),
+      code: formValue(form, "code"),
+      session: formValue(form, "session"),
+      board: formValue(form, "board"),
+      city: formValue(form, "city"),
+      contactName: formValue(form, "contactName"),
+      email: formValue(form, "email"),
+      mobile: formValue(form, "mobile"),
+      adminUsername: formValue(form, "adminUsername"),
+      adminPassword: formValue(form, "adminPassword"),
+      plan: formValue(form, "plan") || "Trial",
+      status: formValue(form, "status") || "Pending",
+      joined: today()
+    };
+    const inserted = await dbInsert("platform_schools", {
+      name: entry.name,
+      code: entry.code,
+      city: entry.city,
+      contact_name: entry.contactName,
+      email: entry.email,
+      mobile: entry.mobile,
+      status: entry.status,
+      plan: entry.plan,
+      joined: entry.joined
+    });
+    if (inserted?.id) {
+      const profile = await dbInsert("school_profiles", {
+        platform_school_id: inserted.id,
+        name: entry.name,
+        code: entry.code,
+        session: entry.session,
+        board: entry.board,
+        city: entry.city
+      });
+      if (profile?.id) {
+        await dbInsert("app_users", {
+          school_id: profile.id,
+          role: "admin",
+          name: entry.contactName,
+          username: entry.adminUsername,
+          password_hash: entry.adminPassword
+        });
+      }
+      state.schools.unshift(inserted);
+      saveState(`Added school ${entry.name}`);
+      form.reset();
+      renderDashboard();
+    }
+    return;
+  }
 
   if (action === "add-class") {
     const className = formValue(form, "name");
@@ -1823,6 +1784,7 @@ function handleClick(event) {
 
   const deleteBtn = event.target.closest("[data-delete]");
   if (deleteBtn && deleteBtn.dataset.delete === "teacher") {
+    if (!requireSupabase()) return;
     const teacherId = deleteBtn.dataset.id;
     const teacher = state.teachers.find((item) => item.id === teacherId);
     state.teachers = state.teachers.filter((item) => item.id !== teacherId);
@@ -1834,6 +1796,7 @@ function handleClick(event) {
 
   const schoolStatusBtn = event.target.closest("[data-school-status]");
   if (schoolStatusBtn) {
+    if (!requireSupabase()) return;
     const school = state.schools.find((item) => item.id === schoolStatusBtn.dataset.id);
     if (!school) return;
     school.status = schoolStatusBtn.dataset.schoolStatus;
@@ -1871,6 +1834,7 @@ el("#logoutBtn").addEventListener("click", () => {
 // Get Started → WhatsApp form handler
 function handleGetStarted(event) {
   event.preventDefault();
+  if (!requireSupabase()) return;
   const form = event.currentTarget;
   const schoolName = formValue(form, "schoolName");
   const address = formValue(form, "address");
@@ -1913,7 +1877,7 @@ refreshHeroMetrics();
 updatePublicWebsite();
 
 // Auto-route: if URL has /admin or #admin, go straight to login with Platform Admin
-if (window.location.pathname.includes("/admin") || window.location.hash === "#admin") {
+if (isPlatformAdminRoute()) {
   showAuthPage();
 }
 
