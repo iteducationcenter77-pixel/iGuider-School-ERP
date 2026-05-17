@@ -34,190 +34,91 @@
     <symbol id="icon-log-out" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
     <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
   </svg>
-  <header class="topbar" data-public>
-    <a class="brand" href="#home" aria-label="iGuider home">
-      <span class="brand-mark">iG</span>
-      <span>
-        <strong>iGuider</strong>
-        <small>School Management</small>
-      </span>
-    </a>
-    <nav class="nav-links" aria-label="Main navigation">
-      <a href="#features">Features</a>
-      <a href="#roles">Roles</a>
-    </nav>
-    <div class="topbar-actions">
-      <button class="nav-icon-btn" data-view="auth" type="button" aria-label="Log in" id="topbarLoginBtn">
-        <svg width="16" height="16"><use href="#icon-log-in"/></svg>
-        Log In
-      </button>
-      <button class="primary-btn compact-btn" data-view="getstarted" type="button" aria-label="Get Started" id="topbarGetStartedBtn">
-        Get Started
-      </button>
-    </div>
-  </header>
-
+  
   <main id="publicPage">
-    <section id="home" class="hero">
-      <div class="hero-overlay"></div>
+    <header class="topbar" data-public>
+      <a href="#" class="brand">
+        <span class="brand-mark">iG</span>
+        <span>
+          <strong>iGuider</strong>
+          <small>Premium School ERP</small>
+        </span>
+      </a>
+      <div class="topbar-actions">
+        <button class="nav-icon-btn" data-view="auth" type="button" aria-label="Log in" id="topbarLoginBtn">
+          <svg width="16" height="16"><use href="#icon-log-in"/></svg>
+          Log In
+        </button>
+        <button class="primary-btn compact-btn" data-view="getstarted" type="button" aria-label="Get Started" id="topbarGetStartedBtn">
+          Get Started
+        </button>
+      </div>
+    </header>
+
+    <section class="hero">
       <div class="hero-content">
-        <p class="eyebrow" id="publicHeroEyebrow">Premium school operations platform</p>
-        <h1 id="publicHeroTitle">iGuider School Management System</h1>
-        <p class="hero-copy" id="publicHeroCopy">Run admissions, teachers, classes, subjects, attendance, exams, fees, notices, question papers, homework, and parent progress tracking from one elegant school portal.</p>
-        <div class="hero-proof-row">
-          <span>Multi-school ready</span>
-          <span>Role-based portals</span>
-          <span>Parent mobile experience</span>
-        </div>
+        <p class="eyebrow">iGuider ERP</p>
+        <h1>One intelligent portal for every school role.</h1>
+        <p class="lead">Generate reports, manage attendance, and run academics from one clean workflow. Built for modern schools and coaching teams.</p>
         <div class="hero-actions">
           <button class="primary-btn" data-view="auth">School Login</button>
           <button class="secondary-btn" data-view="getstarted">Get Started</button>
         </div>
       </div>
-      <div class="hero-visual" aria-label="School ERP preview">
-        <div class="erp-window">
-          <div class="erp-topline"><span></span><span></span><span></span></div>
-          <div class="erp-grid">
-            <div></div><div></div><div></div>
-            <div></div><div></div><div></div>
-          </div>
-          <div class="erp-chart"><span></span><span></span><span></span><span></span></div>
-        </div>
-        <div class="mobile-preview" aria-label="Mobile app preview">
-          <div class="phone-speaker"></div>
-          <div class="phone-screen">
-            <div class="phone-header">
-              <strong>iGuider</strong>
-              <span>Today</span>
-            </div>
-            <div class="phone-card large"></div>
-            <div class="phone-list"><span></span><span></span><span></span></div>
-            <div class="phone-tabs"><span></span><span></span><span></span></div>
-          </div>
-        </div>
-        <div class="student-card">
-          <strong>Academic Growth</strong>
-          <span>Attendance, exams, fees, and reports in one place</span>
-        </div>
-      </div>
-      <aside class="hero-panel hero-metrics-strip" aria-label="Live school summary">
-        <div>
-          <span class="metric-value" id="heroTeacherCount">0</span>
-          <span class="metric-label">Teachers</span>
-        </div>
-        <div>
-          <span class="metric-value" id="heroStudentCount">0</span>
-          <span class="metric-label">Students</span>
-        </div>
-        <div>
-          <span class="metric-value" id="heroExamCount">0</span>
-        <span class="metric-label">Academic Records</span>
-        </div>
-      </aside>
     </section>
 
-    <section id="features" class="section feature-band">
-      <div class="section-heading">
-        <p class="eyebrow">Complete control</p>
-        <h2>Everything a school needs to operate digitally</h2>
-      </div>
-      <div class="feature-grid">
-        <article class="feature-card">
-          <span class="feature-icon">01</span>
-          <h3>Administration</h3>
-          <p>Manage teachers, students, parents, classes, sections, subjects, and credentials.</p>
+    <section class="section">
+      <div class="feature-grid" style="max-width: 1000px; margin: -80px auto 40px; position: relative; z-index: 5;">
+        <article class="premium-plate" style="padding: 32px; text-align: left;">
+          <h3 style="margin-top:0;">Admin</h3>
+          <p class="mini-text">Full access to manage the institution, teachers, and system-wide configurations.</p>
         </article>
-        <article class="feature-card">
-          <span class="feature-icon">02</span>
-          <h3>Academics</h3>
-          <p>Configure exams, enter marks, prepare reports, track attendance, and assign homework.</p>
+        <article class="premium-plate" style="padding: 32px; text-align: left;">
+          <h3 style="margin-top:0;">Teacher</h3>
+          <p class="mini-text">Run academics, upload marks, prepare papers, and assign homework seamlessly.</p>
         </article>
-        <article class="feature-card">
-          <span class="feature-icon">03</span>
-          <h3>Parent Engagement</h3>
-          <p>Parents can view marks, attendance, homework, notices, fee dues, and progress trends.</p>
-        </article>
-        <article class="feature-card">
-          <span class="feature-icon">04</span>
-          <h3>Operations</h3>
-          <p>Publish notices, build timetables, manage fee records, and maintain audit-ready data.</p>
+        <article class="premium-plate" style="padding: 32px; text-align: left;">
+          <h3 style="margin-top:0;">Parent</h3>
+          <p class="mini-text">Track child progress, view fee dues, and receive real-time school notices.</p>
         </article>
       </div>
     </section>
-
-    <section id="roles" class="section role-band">
-      <div class="section-heading">
-        <p class="eyebrow">Role based</p>
-        <h2>Separate dashboards for every user</h2>
-      </div>
-      <div class="role-strip">
-        <div><strong>School Admin</strong><span>Teacher setup, notices, school overview</span></div>
-        <div><strong>Teacher</strong><span>Question papers, marks, parents</span></div>
-        <div><strong>Class Teacher</strong><span>Students and parent records</span></div>
-        <div><strong>Parent</strong><span>Child progress and notices</span></div>
-      </div>
-    </section>
-
   </main>
 
   <section id="authPage" class="auth-page" hidden>
-    <button class="back-link" data-view="public">
+    <button class="back-link" data-view="public" type="button">
       <svg width="14" height="14"><use href="#icon-arrow-left"/></svg>
       Back to website
     </button>
-    <div class="auth-ambient">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-    <div class="auth-stage">
-      <aside class="auth-story">
-        <div class="brand auth-brand">
-          <span class="brand-mark">iG</span>
-          <span>
-            <strong>iGuider</strong>
-            <small>Premium School ERP</small>
-          </span>
-        </div>
-        <p class="eyebrow">Secure access suite</p>
-        <h2>One intelligent portal for every school role.</h2>
-        <p>Admins manage the institution, teachers run academics, and parents track progress through a clean role-based experience.</p>
-        <div class="auth-proof">
-          <div><strong>100%</strong><span>Role controlled</span></div>
-          <div><strong>24/7</strong><span>Parent access</span></div>
-          <div><strong>All-in-one</strong><span>Academic operations</span></div>
-        </div>
-      </aside>
 
-      <div class="login-panel premium-card">
-        <div class="section-heading compact">
-          <p class="eyebrow">Welcome back</p>
-          <h2>Login to iGuider</h2>
-          <p class="mini-text">Choose a role and enter the credentials issued by the school.</p>
-        </div>
-        <form id="loginForm" class="login-form">
-          <label>
-            Role
-            <select id="roleSelect">
-              <option value="admin">School Admin</option>
-              <option value="teacher">Teacher</option>
-              <option value="parent">Parent</option>
-            </select>
-          </label>
-          <label>
-            Username
-            <input id="usernameInput" type="text" autocomplete="username" required />
-          </label>
-          <label>
-            Password
-            <input id="passwordInput" type="password" autocomplete="current-password" required />
-          </label>
-          <button class="primary-btn full" type="submit">Log In</button>
-        </form>
-        <p class="mini-text" style="margin-top: var(--space-md); text-align:center;">
-          Don't have an account? <a href="#" data-view="getstarted" style="color:var(--accent);font-weight:600;text-decoration:none;">Get Started</a>
-        </p>
+    <div class="login-panel premium-plate">
+      <div class="section-heading compact">
+        <p class="eyebrow">Welcome back</p>
+        <h2>Login to iGuider</h2>
+        <p class="mini-text">Choose a role and enter the credentials issued by the school.</p>
       </div>
+      <form id="loginForm" class="login-form">
+        <label>
+          Role
+          <select id="roleSelect">
+            <option value="admin">School Admin</option>
+            <option value="teacher">Teacher</option>
+            <option value="parent">Parent</option>
+          </select>
+        </label>
+        <label>
+          Username
+          <input id="usernameInput" type="text" autocomplete="username" required />
+        </label>
+        <label>
+          Password
+          <input id="passwordInput" type="password" autocomplete="current-password" required />
+        </label>
+        <button class="primary-btn full" type="submit">Log In</button>
+      </form>
+      <p class="mini-text" style="margin-top: var(--space-md); text-align:center;">
+        Don't have an account? <a href="#" data-view="getstarted" style="color:var(--accent);font-weight:600;text-decoration:none;">Get Started</a>
+      </p>
     </div>
   </section>
 
@@ -227,25 +128,8 @@
       <svg width="14" height="14"><use href="#icon-arrow-left"/></svg>
       Back to website
     </button>
-    <aside class="auth-aside">
-      <div class="brand auth-brand">
-        <span class="brand-mark">iG</span>
-        <span>iGuider<small>Premium School ERP</small></span>
-      </div>
-      <div class="floating-cards" aria-hidden="true"><div class="float-card"></div><div class="float-card"></div></div>
-      <div class="section-heading">
-        <p class="eyebrow">Get Started</p>
-        <h1>Transform your school operations today.</h1>
-        <p class="mini-text">Fill in your details and our team will contact you within 24 hours to set up your account.</p>
-      </div>
-      <div class="auth-stats">
-        <div><strong>500+</strong><span>Schools onboarded</span></div>
-        <div><strong>Free</strong><span>Setup & training</span></div>
-        <div><strong>24/7</strong><span>Dedicated support</span></div>
-      </div>
-    </aside>
-
-    <div class="login-panel premium-card">
+    
+    <div class="login-panel premium-plate">
       <div class="section-heading compact">
         <p class="eyebrow">Inquiry Form</p>
         <h2>Register Your Interest</h2>
