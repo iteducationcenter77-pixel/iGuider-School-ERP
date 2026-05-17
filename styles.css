@@ -564,10 +564,48 @@ h3 {
   background: var(--soft);
 }
 
+.auth-page {
+  min-height: calc(100vh - 73px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(40px, 6vw, 80px) 20px;
+  background: var(--soft);
+  position: relative;
+}
+
+.back-link {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.back-link:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
 .login-panel,
 .dashboard,
 .data-panel {
   padding: 24px;
+}
+
+.login-panel {
+  position: relative;
+  z-index: 10;
 }
 
 .login-form {
@@ -958,6 +996,7 @@ textarea {
   content: "";
   position: absolute;
   inset: 0;
+  pointer-events: none;
   background:
     radial-gradient(circle at 20% 30%, rgba(37,99,235,0.15), transparent 40%),
     radial-gradient(circle at 80% 70%, rgba(139,92,246,0.12), transparent 40%);

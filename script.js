@@ -16,7 +16,7 @@ const seedData = {
     }
   },
   users: [
-    { role: "platform", username: "platform", password: "admin123", name: "iGuider Platform Admin" },
+    { role: "platform", username: window.IGUIDER_SUPABASE?.platformUsername || "platform", password: window.IGUIDER_SUPABASE?.platformPassword || "admin123", name: "iGuider Platform Admin" },
     { role: "admin", username: "admin", password: "admin123", name: "School Admin" },
     { role: "teacher", username: "anita", password: "teach123", teacherId: "t1", name: "Anita Sharma" },
     { role: "teacher", username: "rohan", password: "teach123", teacherId: "t2", name: "Rohan Mehta" },
